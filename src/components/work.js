@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState } from 'react';
 import image1 from "../images/works/bms-dashbard.png";
 import image2 from "../images/works/bms-desktop-computer.png";

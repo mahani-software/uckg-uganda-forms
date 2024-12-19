@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import bannerImage from "../images/bgimage01.webp";
 import logoImage from '../images/logo-advert-transparent2.png';

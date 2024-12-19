@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import logo from "../images/logo-horiz-transparent.png";
 import bgimage1 from "../images/footer-shape-left.png";

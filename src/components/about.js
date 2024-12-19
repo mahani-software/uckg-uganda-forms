@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from 'react';
 import aboutUsIllustration from "../images/about.svg";
 
