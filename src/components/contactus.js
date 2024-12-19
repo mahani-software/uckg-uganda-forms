@@ -42,6 +42,7 @@ const ContactForm = () => {
             // Send email via EmailJS
             const response = await emailjs.send(serviceID, templateID, templateParams, userID);
             setResponseMessage("Thank you for contacting us! We will get in touch shortly.");
+            console.log("ok. response =", response?.data.message)
         } catch (error) {
             setResponseMessage("Something went wrong. Please try again.");
         } finally {

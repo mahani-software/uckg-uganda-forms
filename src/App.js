@@ -4,7 +4,7 @@ import Hero from './components/hero';
 import About from './components/about';
 import Footer from './components/footer';
 import ServicesSection from './components/services';
-import WorkSection from './components/work';
+//import WorkSection from './components/work';
 import ContactForm from './components/contactus';
 import "./index.css"
 

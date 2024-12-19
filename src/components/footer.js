@@ -22,7 +22,7 @@ const Footer = () => {
                         {/* Left section - About */}
                         <div className="text-center lg:text-left">
                             <div className="footer_logo mb-6">
-                                <a href="#"><img src={logo} alt="Logo" className="max-w-[70%] mx-auto lg:mx-0" /></a>
+                                <a href="javascript:void(0)"><img src={logo} alt="Logo" className="max-w-[70%] mx-auto lg:mx-0" /></a>
                             </div>
                             <div className="footer_content">
                                 <p className="text-white text-sm lg:text-base leading-relaxed">
@@ -36,9 +36,9 @@ const Footer = () => {
                         <div className="text-center lg:text-left lg:pl-20">
                             <h2 className="text-xl font-semibold text-white mb-4">Quick Links</h2>
                             <ul className="space-y-4">
-                                <li><a href="#" className="text-blue-200 hover:text-white underline">Company</a></li>
-                                <li><a href="#" className="text-blue-200 hover:text-white underline">Privacy Policy</a></li>
-                                <li><a href="#" className="text-blue-200 hover:text-white underline">About</a></li>
+                                <li><a href="javascript:void(0)" className="text-blue-200 hover:text-white underline">Company</a></li>
+                                <li><a href="javascript:void(0)" className="text-blue-200 hover:text-white underline">Privacy Policy</a></li>
+                                <li><a href="javascript:void(0)" className="text-blue-200 hover:text-white underline">About</a></li>
                             </ul>
                         </div>
 
