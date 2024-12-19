@@ -6,13 +6,14 @@ const Hero = () => {
     return (
         <div
             id="home"
-            className="flex relative z-10 overflow-hidden lg:flex  justify-between lg:flex-row lg:gap-2"
-            style={{
-                backgroundImage: `url(${headerImage})`,
-                backgroundSize: '75%',
-                backgroundRepeat: 'no-repeat',
-                marginTop: '70px'
-            }}
+            //className="flex relative z-10 overflow-hidden lg:flex justify-between lg:flex-row lg:gap-2"
+            className={`flex relative z-10 overflow-hidden lg:flex justify-between lg:flex-row lg:gap-2 bg-[url(${headerImage})] bg-[100%] lg:bg-[75%] bg-no-repeat mt-[70px]`}
+        // style={{
+        //     backgroundImage: `url(${headerImage})`,
+        //     backgroundSize: '75%',
+        //     backgroundRepeat: 'no-repeat',
+        //     marginTop: '70px'
+        // }}
         >
             <div className="lg:w-[40%] mt-200">
                 <div className="w-full p-[5%] pr-0 items-center">
