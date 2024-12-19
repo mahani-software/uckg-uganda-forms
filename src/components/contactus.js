@@ -30,22 +30,25 @@ const ContactForm = () => {
         // EmailJS Service and Template Info
         const serviceID = "mahani_website";
         const templateID = "contactus_msg_template";
-        const userID = "mahanitech";
+        const userPublicID = "QzOrrbvkpTARpI3nt";
 
         // Prepare the email data
         const templateParams = {
+            to_name: "Engineering",
             from_name: formData.name,
             from_email: formData.email,
+            subject: "Contact-us message from mahanitech.com",
             message: formData.message,
         };
 
         try {
             // Send email via EmailJS
-            const response = await emailjs.send(serviceID, templateID, templateParams, userID);
+            const response = await emailjs.send(serviceID, templateID, templateParams, userPublicID);
             setResponseMessage("Thank you for contacting us! We will get in touch shortly.");
-            console.log("ok. response =", response?.data.message)
+            console.log("ok. response =", response?.text)
         } catch (error) {
             setResponseMessage("Something went wrong. Please try again.");
+            console.log("ERR:-", error)
         } finally {
             setIsLoading(false);
         }
