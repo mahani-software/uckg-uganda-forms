@@ -2,7 +2,7 @@
   "name": "mahani-website",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://username.github.io/mahani-website-react",
+  "homepage": "https://rodgers-mahanitech.github.io/mahani-website-react",
   "dependencies": {
     "cra-template": "1.2.0",
     "emailjs-com": "^3.2.0",
