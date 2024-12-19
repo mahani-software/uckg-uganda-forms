@@ -22,7 +22,7 @@ const Footer = () => {
                         {/* Left section - About */}
                         <div className="text-center lg:text-left">
                             <div className="footer_logo mb-6">
-                                <a href="javascript:void(0)"><img src={logo} alt="Logo" className="max-w-[70%] mx-auto lg:mx-0" /></a>
+                                <a href="#home"><img src={logo} alt="Logo" className="max-w-[70%] mx-auto lg:mx-0" /></a>
                             </div>
                             <div className="footer_content">
                                 <p className="text-white text-sm lg:text-base leading-relaxed">
