@@ -36,9 +36,8 @@ const Footer = () => {
                         <div className="text-center lg:text-left lg:pl-20">
                             <h2 className="text-xl font-semibold text-white mb-4">Quick Links</h2>
                             <ul className="space-y-4">
-                                <li><a href="javascript:void(0)" className="text-blue-200 hover:text-white underline">Company</a></li>
-                                <li><a href="javascript:void(0)" className="text-blue-200 hover:text-white underline">Privacy Policy</a></li>
-                                <li><a href="javascript:void(0)" className="text-blue-200 hover:text-white underline">About</a></li>
+                                <li><a href="#home" className="text-blue-200 hover:text-white underline">Company</a></li>
+                                <li><a href="#about" className="text-blue-200 hover:text-white underline">About</a></li>
                             </ul>
                         </div>
 
