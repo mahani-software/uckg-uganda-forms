@@ -28,9 +28,9 @@ const ContactForm = () => {
         setResponseMessage("Sending...");
 
         // EmailJS Service and Template Info
-        const serviceID = "your_service_id";   // From your EmailJS account
-        const templateID = "your_template_id"; // From your EmailJS account
-        const userID = "your_user_id";         // From your EmailJS account
+        const serviceID = "mahani_website";
+        const templateID = "contactus_msg_template";
+        const userID = "mahanitech";
 
         // Prepare the email data
         const templateParams = {
