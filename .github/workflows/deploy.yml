@@ -21,6 +21,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Configure name
+        run: git config user.name "Mahanitech-CI-CD"
+
+      - name: Configure email
+        run: git config user.email "engineering@mahanitech.com"
+
       - name: Deploy to GitHub Pages
         run: npm run deploy
         env:
