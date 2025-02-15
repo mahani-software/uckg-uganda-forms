@@ -1,2 +1,2 @@
-# mahani-website-react
-www.mahanitech.com
+# rento-scanner
+www.rentoscanner.com

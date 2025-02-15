@@ -1,8 +1,8 @@
 {
-  "name": "mahani-website",
+  "name": "rento-scanner",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://www.mahanitech.com",
+  "homepage": "https://www.rentoscanner.com",
   "dependencies": {
     "cra-template": "1.2.0",
     "emailjs-com": "^3.2.0",
@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && rm -rf ../../backend/rento-scanner-client-loader/react && mv build ../../backend/rento-scanner-client-loader/react",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
