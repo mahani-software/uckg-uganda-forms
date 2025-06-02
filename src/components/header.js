@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import logo from "../images/rento-scanner-logo.png";
+import logo from "../images/uckg-logo.png";
 import { MdMenu } from 'react-icons/md';
 
 const Header = () => {
@@ -10,12 +10,12 @@ const Header = () => {
             <div className="flex justify-between items-center">
                 <div className="flex items-center">
                     {/* Logo and Company Name */}
-                    <img src={logo} alt="Logo" className="h-10 w-18 mr-5" />
-                    <div className="font-bold text-xl">rento-scanner</div>
+                    <img src={logo} alt="Logo" className="h-10 mr-5" />
+                    <div className="font-bold text-xl">UCKG Uganda Forms</div>
                 </div>
                 <nav className="lg:flex hidden">
-                    <a href="#" className="text-white mx-4">Home</a>
-                    <a href="#" className="text-white mx-4">About</a>
+                    <a href="#" className="text-white mx-4">Students</a>
+                    <a href="#" className="text-white mx-4">Members</a>
                 </nav>
 
                 {/* Mobile Menu Toggle */}
@@ -30,8 +30,8 @@ const Header = () => {
             {menuOpen && (
                 <div className="lg:hidden absolute top-16 left-0 w-full bg-lime-50 shadow-md">
                     <div className="flex flex-col items-center py-4">
-                        <a href="#home" className="700 py-2 text-blue-600">Home</a>
-                        <a href="#about" className="py-2 text-blue-600">About</a>
+                        <a href="#home" className="700 py-2 text-blue-600">Students</a>
+                        <a href="#about" className="py-2 text-blue-600">Members</a>
                     </div>
                 </div>
             )}
