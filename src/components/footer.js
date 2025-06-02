@@ -10,7 +10,9 @@ const Footer = () => {
                 <div className="flex items-center text-center lg:text-right mt-4 lg:mt-0">
                     <p className="flex items-center whitespace-nowrap">
                         Powered by <span className="mx-3">|</span>
-                        <img src={mahaniLogo} alt="Mahani Software engineering" className="h-6 mx-2" />
+                        <a href="https://www.mahanitech.com">
+                            <img src={mahaniLogo} alt="Mahani Software engineering" className="h-6 mx-2" />
+                        </a>
                     </p>
                 </div>
             </div>
