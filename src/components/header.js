@@ -13,10 +13,6 @@ const Header = () => {
                     <img src={logo} alt="Logo" className="h-10 mr-5" />
                     <div className="font-bold text-xl">UCKG Uganda Forms</div>
                 </div>
-                <nav className="lg:flex hidden">
-                    <a href="#" className="text-white mx-4">Students</a>
-                    <a href="#" className="text-white mx-4">Members</a>
-                </nav>
 
                 {/* Mobile Menu Toggle */}
                 <div className="lg:hidden">
