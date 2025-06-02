@@ -2,7 +2,7 @@
   "name": "uckg-uganda-forms",
   "version": "1.1.0",
   "private": true,
-  "homepage": "https://github.com/mahani-software.github.io/uckg-uganda-forms",
+  "homepage": "https://mahani-software.github.io/uckg-uganda-forms",
   "dependencies": {
     "cra-template": "1.2.0",
     "emailjs-com": "^3.2.0",
@@ -15,6 +15,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
