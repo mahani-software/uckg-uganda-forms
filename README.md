@@ -1,2 +1,1 @@
-# rento-scanner
-www.rentoscanner.com
+# UCKG Uganda Forms
