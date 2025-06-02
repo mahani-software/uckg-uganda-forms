@@ -39,6 +39,7 @@ const CoursesIntakeForm = () => {
             try {
                 const res = await fetch(WEB_APP_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json',
                         'x-api-key': API_KEY
