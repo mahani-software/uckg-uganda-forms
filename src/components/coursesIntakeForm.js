@@ -4,7 +4,8 @@ const CoursesIntakeForm = () => {
     const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const WEB_APP_URL = 'https://script.google.com/macros/s/your-script-id/exec'; // Replace this
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbykm0lNGJzPfmgOI44rnv02uydBKtIf9SrCij8dFQO_qpX5j1LWD1x2YKY-hI4XeVay/exec";
+    const API_KEY = "mahanitechuckgugandaformssecret";
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -14,6 +15,7 @@ const CoursesIntakeForm = () => {
         const formData = new FormData(e.target);
         const name = formData.get('name');
         const email = formData.get('email');
+        const phone = formData.get('phone');
         const file = formData.get('photo');
 
         if (!name || !email || !file) {
@@ -29,6 +31,7 @@ const CoursesIntakeForm = () => {
             const payload = {
                 name,
                 email,
+                phone,
                 photoBase64: base64,
                 photoName: file.name
             };
@@ -37,7 +40,8 @@ const CoursesIntakeForm = () => {
                 const res = await fetch(WEB_APP_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'x-api-key': API_KEY
                     },
                     body: JSON.stringify(payload)
                 });
@@ -74,6 +78,15 @@ const CoursesIntakeForm = () => {
                     <input
                         type="email"
                         name="email"
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input
+                        type="text"
+                        name="phone"
                         required
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     />
