@@ -12,12 +12,12 @@ const App = () => {
   const [cards, setCards] = useState({
     studentAdmissionForm: {
       key: "studentAdmissionForm",
-      visible: false,
+      visible: true,
       component: CoursesAdmissionForm
     },
     studentRegistrationForm: {
       key: "studentRegistrationForm",
-      visible: true,
+      visible: false,
       component: CoursesIntakeForm
     },
     memberRegistrationForm: {
