@@ -1,36 +1,25 @@
 import React, { useState } from 'react';
-import logo from "../images/uckg-logo.png";
+import logo from "../images/vyg.jpeg";
 import { MdMenu } from 'react-icons/md';
+import { default as RightDrawer } from "./rightDrawer"
 
-const Header = () => {
+const Header = ({ showCard, hideCard, visibleCards }) => {
     const [menuOpen, setMenuOpen] = useState(false);
 
     return (
-        <header className="bg-lime-600 text-white p-4 px-[5%]">
+        <header className="bg-lime-600 text-white p-4 px-[5%] relative">
             <div className="flex justify-between items-center">
                 <div className="flex items-center">
-                    {/* Logo and Company Name */}
                     <img src={logo} alt="Logo" className="h-10 mr-5" />
-                    <div className="font-bold text-xl">UCKG Uganda Forms</div>
+                    <div className="font-bold text-xl">Uganda</div>
                 </div>
 
-                {/* Mobile Menu Toggle */}
-                <div className="lg:hidden">
-                    <button onClick={() => setMenuOpen(!menuOpen)} className="text-white">
-                        <MdMenu size={30} />
-                    </button>
-                </div>
+                <button onClick={() => setMenuOpen(!menuOpen)} className="text-white">
+                    <MdMenu size={30} />
+                </button>
             </div>
 
-            {/* Mobile Menu */}
-            {menuOpen && (
-                <div className="lg:hidden absolute top-16 left-0 w-full bg-lime-50 shadow-md">
-                    <div className="flex flex-col items-center py-4">
-                        <a href="#home" className="700 py-2 text-blue-600">Students</a>
-                        <a href="#about" className="py-2 text-blue-600">Members</a>
-                    </div>
-                </div>
-            )}
+            <RightDrawer showCard={showCard} hideCard={hideCard} visibleCards={visibleCards} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
         </header>
     );
 };

@@ -29,7 +29,7 @@ const FloatingLabelInput = ({ label, name, type = "text", required = false }) =>
     );
 };
 
-const CoursesIntakeForm = () => {
+const MenberRegistrationForm = () => {
     const [status, setStatus] = useState('');
     const [loading, setLoading] = useState(false);
     const [preview, setPreview] = useState(null);
@@ -113,7 +113,7 @@ const CoursesIntakeForm = () => {
 
     return (
         <div className="max-w-lg p-6 bg-white rounded-lg shadow-lg">
-            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">Register Student</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800"> Register member </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <FloatingLabelInput label="Name" name="name" required />
@@ -178,4 +178,4 @@ const CoursesIntakeForm = () => {
     );
 };
 
-export default CoursesIntakeForm;
+export default MenberRegistrationForm;
