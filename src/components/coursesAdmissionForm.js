@@ -1,16 +1,19 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FloatingLabelInput } from "./floatingLabelInput"
-import { useItemRegistrerMutation } from "../backend/api/sharedCrud"
+import { useItemRegistrerMutation, useItemsListReaderQuery } from "../backend/api/sharedCrud"
+import { useSelector } from 'react-redux';
+import { selectList } from '../backend/features/sharedMainState';
 
 const CoursesAdmissionForm = () => {
-    const [status, setStatus] = useState('');
+    const [status, setStatus] = useState("");
     const [loading, setLoading] = useState(false);
     const [preview, setPreview] = useState(null);
     const [photoLabel, setPhotoLabel] = useState('Profile Photo');
     const [photoUploadGuid, setPhotoUploadGuid] = useState(undefined);
     const [coursesAppliedFor, setCoursesAppliedFor] = useState([]);
-    const [gender, setGender] = useState('');
+    const [gender, setGender] = useState("");
+    const [maritalStatus, setMaritalStatus] = useState("");
     const [intakeGuid, setIntakeGuid] = useState('');
     const [intakes, setIntakes] = useState([{ guid: "yrjjhrueuyry", year: "2024", month: "JUL" }, { guid: "ea3241435636dc23", year: "2025", month: "JUL" }, { guid: "ea3241435636daa21", year: "2026", month: "JUL" }]);          //TODO: fetched from backend
     const [allCourses, setAllCourses] = useState([{ guid: "ea324241315ac", courseName: "Database admin" }, { guid: "ea324774322", courseName: "Accounting" }]);    //TODO: fetched from backend
@@ -75,6 +78,23 @@ const CoursesAdmissionForm = () => {
     };
     //============ /end submit to google sheets===============
 
+    const {
+        isLoading: intakesLoading,
+        isSuccess: intakesSucceeded,
+        isError: intakesFailed,
+        error: intakesError,
+    } = useItemsListReaderQuery({ entity: "intake" })
+
+    const {
+        isLoading: coursesLoading,
+        isSuccess: coursesSucceeded,
+        isError: coursesFailed,
+        error: coursesError,
+    } = useItemsListReaderQuery({ entity: "course" })
+
+    const cachedCourses = useSelector(st => selectList(st, "course"))
+    const cachedIntakes = useSelector(st => selectList(st, "intake"))
+
     //============= submit to Cloud Run ======================
     const [uploadNewImage, {
         data: fileUploadSuccessResponse,
@@ -84,6 +104,16 @@ const CoursesAdmissionForm = () => {
         error: fileUploadError,
     }] = useItemRegistrerMutation()
 
+    useEffect(() => {
+        if (fileUploadSucceeded && fileUploadSuccessResponse?.guid) {
+            setPhotoUploadGuid(fileUploadSuccessResponse.guid);
+            setStatus("✅ Photo uploaded");
+        } else if (fileUploadFailed) {
+            console.error("Upload error:", fileUploadError);
+            setStatus("❌ Photo upload failed");
+        }
+    }, [fileUploadSucceeded, fileUploadFailed]);
+
     const [submitNewApplicant, {
         data: applicantRegSuccessResponse,
         isLoading: applicantRegProcessing,
@@ -91,6 +121,19 @@ const CoursesAdmissionForm = () => {
         isError: applicantRegFailed,
         error: applicantRegError,
     }] = useItemRegistrerMutation()
+
+    useEffect(() => {
+        if (applicantRegSucceeded) {
+            setStatus("✅ Applicant successfully registered!");
+            setLoading(false);
+        } else if (applicantRegFailed) {
+            console.error("Registration error:", applicantRegError);
+            setStatus("❌ Failed to register applicant. Please try again.");
+            setLoading(false);
+        }
+    }, [applicantRegSucceeded, applicantRegFailed]);
+
+    console.log("fileUploadError =", fileUploadError)
 
     //============= /end submit to Cloud Run =================
 
@@ -127,30 +170,28 @@ const CoursesAdmissionForm = () => {
         const physicalAddress = formData.get('address');
         const nationality = formData.get('nationality');
         const nationalId = formData.get('nationalid');
-        const maritalStatus = formData.get('maritalstatus');
         const dateOfBirth = formData.get('dobirth');
         const description = formData.get('description');
-        submitNewApplicant({
-            entity: "applicant",
-            data: {
-                // branchGuid,
-                // branchId,
-                intakeGuid,
-                courses: coursesAppliedFor,
-                firstName,
-                lastName,
-                gender,
-                phone,
-                email,
-                physicalAddress,
-                nationality,
-                nationalId,
-                maritalStatus,
-                dateOfBirth,
-                description,
-                photo: photoUploadGuid,
-            }
-        })
+        const payload = {
+            // branchGuid,
+            // branchId,
+            intakeGuid,
+            courses: coursesAppliedFor,
+            firstName,
+            lastName,
+            gender,
+            phone,
+            email,
+            physicalAddress,
+            nationality,
+            nationalId,
+            maritalStatus,
+            dateOfBirth,
+            description,
+            photo: photoUploadGuid,
+        }
+        console.log("payload =", payload)
+        submitNewApplicant({ entity: "applicant", data: payload })
     }
     //--------------
 
@@ -158,17 +199,17 @@ const CoursesAdmissionForm = () => {
         <div className="max-w-lg p-6 bg-white rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800"> Admit Course Applicant </h2>
             <form onSubmit={handleSubmitToCloudRun} className="space-y-4">
-                <div>
+                <div className="pr-2">
                     <label className="block mb-2 text-sm font-medium text-gray-700"> Intake </label>
                     <select
                         name="intakeGuid"
                         value={intakeGuid}
                         onChange={(e) => setIntakeGuid(e.target.value)}
                         required
-                        className="w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                        className="w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 p-2 pl-1"
                     >
                         <option value="">--</option>
-                        {intakes.map((intake) => (
+                        {(cachedIntakes || intakes).map((intake) => (
                             <option key={intake.guid} value={intake.guid}>
                                 {intake.year} - {intake.month}
                             </option>
@@ -188,11 +229,41 @@ const CoursesAdmissionForm = () => {
                         value={gender}
                         onChange={(e) => setGender(e.target.value)}
                         required
-                        className="w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                        className="w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 p-2 pl-1"
                     >
                         <option value="">--</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label htmlFor="dobirth" className="block mb-2 text-sm font-medium text-gray-700">
+                        Date of Birth
+                    </label>
+                    <input
+                        type="date"
+                        name="dobirth"
+                        id="dobirth"
+                        required
+                        className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-lime-500 focus:border-lime-500"
+                    />
+                </div>
+                <div>
+                    <label className="block mb-2 text-sm font-medium text-gray-700">Marital status</label>
+                    <select
+                        name="maritalstatus"
+                        value={maritalStatus}
+                        onChange={(e) => setMaritalStatus(e.target.value)}
+                        required
+                        className="w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 p-2 pl-1"
+                    >
+                        <option value="">--</option>
+                        <option value="Single">Single</option>
+                        <option value="Dating">Dating</option>
+                        <option value="Engaged">Engaged</option>
+                        <option value="Married">Married</option>
+                        <option value="Divorced">Divorced</option>
+                        <option value="Lostspouse">Lost spouse</option>
                     </select>
                 </div>
                 <div>
@@ -217,7 +288,7 @@ const CoursesAdmissionForm = () => {
                 <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700"> Course(s) preferred </label>
                     <div className="space-y-2">
-                        {allCourses.map((course) => (
+                        {(cachedCourses || allCourses).map((course) => (
                             <label key={course.guid} className="flex items-center space-x-2">
                                 <input
                                     type="checkbox"
@@ -266,7 +337,6 @@ const CoursesAdmissionForm = () => {
                         type="file"
                         name="photo"
                         accept="image/*"
-                        required
                         ref={fileInputRef}
                         onChange={handlePhotoChange}
                         className="hidden"
@@ -287,7 +357,11 @@ const CoursesAdmissionForm = () => {
                 </div>
             </form>
 
-            {status && (<p className="mt-4 text-center text-sm font-medium text-gray-700"> {status} </p>)}
+            {status && (
+                <div className={`mt-4 text-center text-sm font-medium px-4 py-2 rounded-md ${status.startsWith("✅") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                    {status}
+                </div>
+            )}
         </div>
     );
 };

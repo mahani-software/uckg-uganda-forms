@@ -69,7 +69,6 @@ const mainSlice = createSlice({
                     mainAdaptors[entity].upsertOne(state[entity], Data)
                     if (topic === "message") {
                         //TODO: notify the chatting screen and the chatsList screen to re-render, if they are currently mounted
-
                     }
                 } else if ((typeof ev === "string") && (typeof cb === "function") && (typeof componentId === "string")) {
                     if (!backendEventCallbacksMap[ev]) {

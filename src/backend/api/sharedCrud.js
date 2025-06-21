@@ -122,6 +122,8 @@ export const sharedCrudApi = appiiSlice.injectEndpoints({
     itemRegistrer: builder.mutation({
       query: ({ entity, submissionEndpoint, data }) => {
         const url = `/${submissionEndpoint || entity}`
+        console.log("data =", data)
+        console.log("url =", url)
         return ({
           url,
           method: "POST",
