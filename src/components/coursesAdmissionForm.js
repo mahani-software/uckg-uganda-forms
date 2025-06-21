@@ -12,7 +12,7 @@ const CoursesAdmissionForm = () => {
     const [coursesAppliedFor, setCoursesAppliedFor] = useState([]);
     const [gender, setGender] = useState('');
     const [intakeGuid, setIntakeGuid] = useState('');
-    const [intakes, setIntakes] = useState([{ guid: "yrjjhrueuyry", year: "2024", month: "JUL" }]);          //TODO: fetched from backend
+    const [intakes, setIntakes] = useState([{ guid: "yrjjhrueuyry", year: "2024", month: "JUL" }, { guid: "ea3241435636dc23", year: "2025", month: "JUL" }, { guid: "ea3241435636daa21", year: "2026", month: "JUL" }]);          //TODO: fetched from backend
     const [allCourses, setAllCourses] = useState([{ guid: "ea324241315ac", courseName: "Database admin" }, { guid: "ea324774322", courseName: "Accounting" }]);    //TODO: fetched from backend
     const fileInputRef = useRef(null);
 
@@ -167,7 +167,7 @@ const CoursesAdmissionForm = () => {
                         required
                         className="w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
                     >
-                        <option value="">Choose intake</option>
+                        <option value="">--</option>
                         {intakes.map((intake) => (
                             <option key={intake.guid} value={intake.guid}>
                                 {intake.year} - {intake.month}
@@ -190,7 +190,7 @@ const CoursesAdmissionForm = () => {
                         required
                         className="w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
                     >
-                        <option value=""></option>
+                        <option value="">--</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                     </select>
