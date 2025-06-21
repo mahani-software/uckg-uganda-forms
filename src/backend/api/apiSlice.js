@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createEntityAdapter } from "@reduxjs/toolkit";
 // import { getWebSocketInstance } from './websocketConnection';

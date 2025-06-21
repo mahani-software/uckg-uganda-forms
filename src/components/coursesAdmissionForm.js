@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import React, { useState, useRef } from 'react';
 import { FloatingLabelInput } from "./floatingLabelInput"
 import { useItemRegistrerMutation } from "../backend/api/sharedCrud"

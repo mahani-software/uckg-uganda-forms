@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 // import { createEntityAdapter } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
 // import { sharedCrudApi } from "../api/sharedCrud";
