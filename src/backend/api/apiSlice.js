@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createEntityAdapter } from "@reduxjs/toolkit";
-import { getWebSocketInstance } from './websocketConnection';
+// import { getWebSocketInstance } from './websocketConnection';
 import { setUsrCredentials } from "../features/sharedMainState2"
 const API_BASE_URL = "https://vyg-uganda-backend-189248540294.africa-south1.run.app";
 
@@ -37,28 +37,28 @@ const refreshQuery = fetchBaseQuery({
     },
 });
 
-const websocketBaseQuery = (url) => {
-    return new Promise((resolve, reject) => {
-        const ws = getWebSocketInstance(url);
-        ws.onopen = () => {
-            resolve({ data: "WebSocket connection established." });
-        };
-        ws.onmessage = (event) => {
-            resolve({ data: JSON.parse(event.data) });
-        };
-        ws.onerror = (error) => {
-            reject({ error });
-        };
-        // Return sendMessage function
-        return (message) => {
-            if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify(message));
-            } else {
-                console.error("WebSocket is not open. Cannot send message.");
-            }
-        };
-    });
-};
+// const websocketBaseQuery = (url) => {
+//     return new Promise((resolve, reject) => {
+//         const ws = getWebSocketInstance(url);
+//         ws.onopen = () => {
+//             resolve({ data: "WebSocket connection established." });
+//         };
+//         ws.onmessage = (event) => {
+//             resolve({ data: JSON.parse(event.data) });
+//         };
+//         ws.onerror = (error) => {
+//             reject({ error });
+//         };
+//         // Return sendMessage function
+//         return (message) => {
+//             if (ws.readyState === WebSocket.OPEN) {
+//                 ws.send(JSON.stringify(message));
+//             } else {
+//                 console.error("WebSocket is not open. Cannot send message.");
+//             }
+//         };
+//     });
+// };
 
 const baseQueryWithReauth = async (args, api, extraOptions) => {
 
