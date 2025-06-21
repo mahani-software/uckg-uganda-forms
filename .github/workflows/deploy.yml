@@ -3,6 +3,9 @@ name: Deploy forms to gh pages
 on: [push]
 permissions:
   contents: write
+
+env: 
+  CI: false
 jobs:
   build-and-deploy:
     concurrency: ci-${{ github.ref }}
