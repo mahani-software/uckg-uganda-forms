@@ -68,7 +68,8 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
     // }
     let result = await baseQuery(args, api, extraOptions);
     if (result.error && result.error.status === 401) {
-        const { va: user } = getState().sharedstateslice?.active_collection?.entities?.user || {};
+        const { getState } = api || {}
+        const { va: user } = getState()?.sharedstateslice?.active_collection?.entities?.user || {};
         // try and refresh token
         const refreshResult = await refreshQuery(
             {

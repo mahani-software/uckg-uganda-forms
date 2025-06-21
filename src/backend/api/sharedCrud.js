@@ -307,13 +307,13 @@ export const sharedCrudApi = appiiSlice.injectEndpoints({
     }),
 
     //______________________________________________
-    websocketMessageSender: builder.mutation({
-      query: ({ type = "subscribe", topic = "message", channel }) => ({
-        url: `${WEBSOCKET_BASE_URL}:${WEBSOCKET_PORT}/api/reech-websocket-api/`,
-        method: 'POST',
-        body: { type, topic, channel },
-      }),
-    }),
+    // websocketMessageSender: builder.mutation({
+    //   query: ({ type = "subscribe", topic = "message", channel }) => ({
+    //     url: `${WEBSOCKET_BASE_URL}:${WEBSOCKET_PORT}/api/reech-websocket-api/`,
+    //     method: 'POST',
+    //     body: { type, topic, channel },
+    //   }),
+    // }),
 
     //______________________________________________
     streamDataReader: builder.mutation({
@@ -393,7 +393,7 @@ export const {
   useFormLoaderQuery,
   useGoogleLoginMutation,
   useHttpMessageSenderMutation,
-  useWebsocketMessageSenderMutation,
+  // useWebsocketMessageSenderMutation,
   useStreamDataReaderMutation,
   useOtpVerifierMutation,
   useOtpSmsSenderMutation,

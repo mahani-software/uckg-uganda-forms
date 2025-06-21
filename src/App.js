@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import "./index.css";
 
-import CoursesIntakeForm from './components/coursesIntakeForm';
+import CoursesAdmissionForm from './components/coursesAdmissionForm';
 import MemberRegistrationForm from './components/memberRegistrationForm';
-import CoursesAdmissionForm from "./components/coursesAdmissionForm"
+import StudentRegistrationForm from "./components/studentRegistrationForm"
 import Header from './components/header';
 import Footer from './components/footer';
 
@@ -18,7 +18,7 @@ const App = () => {
     studentRegistrationForm: {
       key: "studentRegistrationForm",
       visible: false,
-      component: CoursesIntakeForm
+      component: StudentRegistrationForm
     },
     memberRegistrationForm: {
       key: "memberRegistrationForm",

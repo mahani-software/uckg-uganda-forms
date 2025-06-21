@@ -41,38 +41,6 @@ export const mainInixoStates = {
 
 let backendEventCallbacksMap = {};
 
-const rememberUsrCredentials = createAsyncThunk(
-    'sharedstateslice/rememberUsrCredentials',
-    async (_, { dispatch }) => {
-        try {
-            const access_token = localStorage.getItem("access_token");
-            const refresh_token = localStorage.getItem("refresh_token");
-            if (!!access_token) {
-                dispatch(rememberToken({ ky: "access_token", va: access_token }));
-            }
-            if (!!refresh_token) {
-                dispatch(rememberToken({ ky: "refresh_token", va: refresh_token }));
-            }
-        } catch (error) {
-            console.warn("Error remembering user saved credentials =", current(error));
-        }
-    }
-);
-
-const removeUsrCredentials = createAsyncThunk(
-    'sharedstateslice/removeUsrCredentials',
-    async (_, { dispatch }) => {
-        try {
-            localStorage.removeItem("access_token");
-            localStorage.removeItem("refresh_token");
-            dispatch(removeToken({ ky: "access_token" }));
-            dispatch(removeToken({ ky: "refresh_token" }));
-        } catch (error) {
-            console.warn("Error removing saved user credentials:", error);
-        }
-    }
-);
-
 const mainSlice = createSlice({
     name: 'sharedstateslice',
     initialState: mainInixoStates,
@@ -83,7 +51,7 @@ const mainSlice = createSlice({
         removeToken: (state, { payload: { ky } }) => {
             mainAdaptors["active_collection"].removeOne(state["active_collection"], ky)
         },
-        streamDataReceivedCallback: (state, { payload: { topic, Data, componentId, ev, cb, unmount } }) => {
+        streamDataReceivedCallback: (state, { payload: { topic, entity, Data, componentId, ev, cb, unmount } }) => {
             try {
                 if (topic === "backendEvent") {
                     const { backendEventType } = Data || {}
@@ -175,10 +143,6 @@ const mainSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(rememberUsrCredentials.fulfilled, (state, { payload }) => {
-                const { ky, va } = payload;
-                activeCollectionAdapter.upsertOne(state.active_collection, { ky, va });
-            })
             .addMatcher(
                 sharedCrudApi.endpoints.userLogin.matchFulfilled,
                 (state, { payload: { access_token, refresh_token, user, profiles } }) => {
@@ -434,8 +398,6 @@ export const {
     setActiveChatPivot,
     saveDownloadedImageData,
 } = mainSlice.actions;
-
-export { rememberUsrCredentials, removeUsrCredentials }
 
 //======================= state selectors (helper functions) =============================
 
