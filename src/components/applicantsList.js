@@ -45,7 +45,7 @@ const ApplicantList = () => {
                     </style>
                 </head>
                 <body>
-                    <img src={DEFAULT_AVATAR} alt="Avatar" />
+                    <img src={${DEFAULT_AVATAR}} alt="Avatar" />
                     <h2>${applicant.firstName} ${applicant.lastName}</h2>
                     <dl>
                         <dt>Applicant ID</dt><dd>${applicant.applicantId}</dd>
