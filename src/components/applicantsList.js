@@ -30,6 +30,10 @@ const ApplicantList = () => {
         setExpandedId(prev => (prev === id ? null : id));
     };
 
+    const renderAvatorOnPrint = () => {
+        return <img src={DEFAULT_AVATAR} alt="Avatar" />
+    }
+
     const handlePrint = (applicant) => {
         const printWindow = window.open('', '_blank');
         const printable = `
@@ -44,9 +48,9 @@ const ApplicantList = () => {
                         img { width: 100px; border-radius: 10px; margin-bottom: 20px; }
                     </style>
                 </head>
-                <body>
-                    <img src={${DEFAULT_AVATAR}} alt="Avatar" />
-                    <h2>${applicant.firstName} ${applicant.lastName}</h2>
+                <body>`
+            + renderAvatorOnPrint() +
+            `<h2>${applicant.firstName} ${applicant.lastName}</h2>
                     <dl>
                         <dt>Applicant ID</dt><dd>${applicant.applicantId}</dd>
                         <dt>Intake</dt><dd>${applicant.intakeGuid?.year} - ${applicant.intakeGuid?.month}</dd>
@@ -55,7 +59,6 @@ const ApplicantList = () => {
                         <dt>Email</dt><dd>${applicant.email}</dd>
                         <dt>Address</dt><dd>${applicant.physicalAddress}</dd>
                         <dt>Nationality</dt><dd>${applicant.nationality}</dd>
-                        <dt>National ID</dt><dd>${applicant.nationalId}</dd>
                     </dl>
                 </body>
             </html>

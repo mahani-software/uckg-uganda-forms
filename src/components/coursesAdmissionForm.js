@@ -94,6 +94,14 @@ const CoursesAdmissionForm = () => {
 
     const cachedCourses = useSelector(st => selectList(st, "course"))
     const cachedIntakes = useSelector(st => selectList(st, "intake"))
+    const [reRender, setReRender] = useState(false);
+    useEffect(() => {
+        if (!cachedCourses || !cachedIntakes) {
+            setTimeout(() => {
+                setReRender(!reRender)
+            }, 2000)
+        }
+    }, [cachedCourses, cachedIntakes])
 
     //============= submit to Cloud Run ======================
     const [uploadNewImage, {
