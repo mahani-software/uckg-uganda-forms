@@ -45,7 +45,7 @@ const ApplicantList = () => {
                     </div>
                 </div>
 
-                <div className="w-full mt-10 p-2 text-md text-justify">
+                <div className="w-full mt-10 py-2 text-md text-justify">
                     You have been offered a place to study for free and learn hands-on skills
                     in the skilling program organised by the Universal Church of the Kingdom of God (UCKG) in Uganda,
                     through the Victory Youth Group (VYG). The details below will be used to track your attendance
