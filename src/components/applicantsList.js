@@ -56,9 +56,6 @@ const ApplicantList = () => {
                         <dt>Address</dt><dd>${applicant.physicalAddress}</dd>
                         <dt>Nationality</dt><dd>${applicant.nationality}</dd>
                         <dt>National ID</dt><dd>${applicant.nationalId}</dd>
-                        // <dt>Marital Status</dt><dd>${applicant.maritalStatus}</dd>
-                        // <dt>Date of Birth</dt><dd>${new Date(applicant.dateOfBirth).toISOString().split('T')[0]}</dd>
-                        // <dt>Challenge faced</dt><dd>${applicant.description}</dd>
                     </dl>
                 </body>
             </html>
@@ -78,9 +75,9 @@ const ApplicantList = () => {
             'Address': applicant.physicalAddress,
             'Nationality': applicant.nationality,
             'National ID': applicant.nationalId,
-            // 'Marital Status': applicant.maritalStatus,
-            // 'Date of Birth': new Date(applicant.dateOfBirth).toISOString().split('T')[0],
-            // 'Challenge faced': applicant.description,
+            'Marital Status': applicant.maritalStatus,
+            'Date of Birth': new Date(applicant.dateOfBirth).toISOString().split('T')[0],
+            'Challenge faced': applicant.description,
         };
 
         return (
