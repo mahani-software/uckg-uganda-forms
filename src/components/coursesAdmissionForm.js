@@ -79,14 +79,14 @@ const CoursesAdmissionForm = () => {
     //============ /end submit to google sheets===============
 
     const {
-        isLoading: intakesLoading,
+        isLoading: intakesProcessing,
         isSuccess: intakesSucceeded,
         isError: intakesFailed,
         error: intakesError,
     } = useItemsListReaderQuery({ entity: "intake" })
 
     const {
-        isLoading: coursesLoading,
+        isLoading: coursesProcessing,
         isSuccess: coursesSucceeded,
         isError: coursesFailed,
         error: coursesError,
@@ -121,7 +121,6 @@ const CoursesAdmissionForm = () => {
         isError: applicantRegFailed,
         error: applicantRegError,
     }] = useItemRegistrerMutation()
-
     useEffect(() => {
         if (applicantRegSucceeded) {
             setStatus("✅ Applicant successfully registered!");
@@ -132,7 +131,6 @@ const CoursesAdmissionForm = () => {
             setLoading(false);
         }
     }, [applicantRegSucceeded, applicantRegFailed]);
-
     console.log("fileUploadError =", fileUploadError)
 
     //============= /end submit to Cloud Run =================
