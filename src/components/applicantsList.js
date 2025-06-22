@@ -128,7 +128,7 @@ const ApplicantList = () => {
 
     return (
         <div className="w-full mx-auto p-6 bg-white rounded-xl shadow-lg md:max-w-[500px]">
-            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">Applicant List</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">Applicants List</h2>
 
             <div className="mb-4">
                 <input
