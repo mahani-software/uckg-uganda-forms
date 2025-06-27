@@ -3,8 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createEntityAdapter } from "@reduxjs/toolkit";
 // import { getWebSocketInstance } from './websocketConnection';
 import { setUsrCredentials } from "../features/sharedMainState2"
-//const API_BASE_URL = "https://vyg-uganda-backend-189248540294.africa-south1.run.app";
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = "https://vyg-uganda-backend-189248540294.africa-south1.run.app";
 
 const activeCollectionAdapter = createEntityAdapter({ selectId: (data) => data.ky });
 
