@@ -137,6 +137,22 @@ export const sharedCrudApi = appiiSlice.injectEndpoints({
     }),
 
     //______________________________________________
+    fileUploader: builder.mutation({
+      query: ({ entity, submissionEndpoint, data }) => {
+        const url = `/${submissionEndpoint || entity}`
+        return ({
+          url,
+          method: "POST",
+          body: data,
+        })
+      },
+      transformResponse: (response, _, { entity }) => {
+        const { data, msg } = response || {}
+        return { entity, Data: data, Message: msg }
+      }
+    }),
+
+    //______________________________________________
     itemsListReader: builder.query({
       query: ({ entity, page = 1, max = 100, filters }) => {
         let targetURL = `/${entity}?page=${page}&limit=${max}`
@@ -383,6 +399,7 @@ export const {
   useUserLoginResendOTPMutation,
   useUserLoginMutation,
   useItemRegistrerMutation,
+  useFileUploaderMutation,
   useItemsListReaderQuery,
   useItemsListReadrMutation,
   useListOptionsQuery,

@@ -186,6 +186,11 @@ const mainSlice = createSlice({
                     mainAdaptors[entity].upsertOne(state[entity], Data);
                 })
             .addMatcher(
+                sharedCrudApi.endpoints.fileUploader.matchFulfilled,
+                (state, { payload: { entity, Data } }) => {
+                    mainAdaptors[entity].upsertOne(state[entity], Data);
+                })
+            .addMatcher(
                 sharedCrudApi.endpoints.itemsListReader.matchFulfilled,
                 (state, { payload: { entity, Data } }) => {
                     try {

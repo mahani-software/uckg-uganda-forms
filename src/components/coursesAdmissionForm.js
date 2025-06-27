@@ -1,9 +1,10 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useRef, useEffect } from 'react';
 import { FloatingLabelInput } from "./floatingLabelInput"
-import { useItemRegistrerMutation, useItemsListReaderQuery } from "../backend/api/sharedCrud"
+import { useFileUploaderMutation, useItemRegistrerMutation, useItemsListReaderQuery } from "../backend/api/sharedCrud"
 import { useSelector } from 'react-redux';
 import { selectList } from '../backend/features/sharedMainState';
+import FilesInput from './filesInput';
 
 const CoursesAdmissionForm = () => {
     const [status, setStatus] = useState("");
@@ -99,7 +100,7 @@ const CoursesAdmissionForm = () => {
         if (!cachedCourses || !cachedIntakes) {
             setTimeout(() => {
                 setReRender(!reRender)
-            }, 2000)
+            }, 1000)
         }
     }, [cachedCourses, cachedIntakes])
 
@@ -110,11 +111,12 @@ const CoursesAdmissionForm = () => {
         isSuccess: fileUploadSucceeded,
         isError: fileUploadFailed,
         error: fileUploadError,
-    }] = useItemRegistrerMutation()
+    }] = useFileUploaderMutation()
+    const { Data: { url, guid } = {} } = fileUploadSuccessResponse || {}
 
     useEffect(() => {
-        if (fileUploadSucceeded && fileUploadSuccessResponse?.guid) {
-            setPhotoUploadGuid(fileUploadSuccessResponse.guid);
+        if (fileUploadSucceeded && (guid || url)) {
+            setPhotoUploadGuid(guid);
             setStatus("✅ Photo uploaded");
         } else if (fileUploadFailed) {
             console.error("Upload error:", fileUploadError);
@@ -131,7 +133,7 @@ const CoursesAdmissionForm = () => {
     }] = useItemRegistrerMutation()
     useEffect(() => {
         if (applicantRegSucceeded) {
-            setStatus("✅ Applicant successfully registered!");
+            setStatus("✅ Applicant registered successfully!");
             setLoading(false);
         } else if (applicantRegFailed) {
             console.error("Registration error:", applicantRegError);
@@ -139,25 +141,25 @@ const CoursesAdmissionForm = () => {
             setLoading(false);
         }
     }, [applicantRegSucceeded, applicantRegFailed]);
-    console.log("fileUploadError =", fileUploadError)
 
     //============= /end submit to Cloud Run =================
 
-    const handlePhotoChange = (e) => {
-        const file = e.target.files[0];
+    const handlePhotoChange = ({ file, formData }) => {
+        console.log("handlePhotoChange called")
+        // const file = e.target.files[0];
         if (file) {
             const previewUrl = URL.createObjectURL(file);
             setPreview(previewUrl);
-            setPhotoLabel('Change Photo');
-            const formData = new FormData();
-            formData.set('file', file);
+            setPhotoLabel("Change Photo");
+            const fData = new FormData();
+            fData.set('file', file);
             uploadNewImage({
                 entity: "fileupload",
-                data: formData,
+                data: fData,
             })
         } else {
             setPreview(null);
-            setPhotoLabel('Profile Photo');
+            setPhotoLabel("Profile Photo");
         }
     };
     const triggerFileInput = () => {
@@ -329,23 +331,14 @@ const CoursesAdmissionForm = () => {
                     </div>
                 )}
 
-                {/* Custom Photo Input */}
-                <div>
-                    <div
-                        onClick={triggerFileInput}
-                        className="cursor-pointer inline-block border border-lime-400 hover:bg-blue-200 text-blue-600 text-sm font-semibold py-2 px-4 rounded-md transition-colors"
-                    >
-                        {photoLabel}
-                    </div>
-
-                    {/* Hidden actual file input */}
-                    <input
-                        type="file"
-                        name="photo"
-                        accept="image/*"
-                        ref={fileInputRef}
-                        onChange={handlePhotoChange}
-                        className="hidden"
+                <div className="container mx-auto">
+                    <FilesInput
+                        uploadImageFn={({ file, formData }) => handlePhotoChange({ file, formData })}
+                        uploadButtonLabel={photoLabel}
+                        maxFiles={1}
+                        maxFileSize={10}
+                        acceptedTypes={['image/*', 'application/pdf', '.doc', '.docx', '.txt']}
+                        uploadImmediately={true}
                     />
                 </div>
 

@@ -3,7 +3,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { createEntityAdapter } from "@reduxjs/toolkit";
 // import { getWebSocketInstance } from './websocketConnection';
 import { setUsrCredentials } from "../features/sharedMainState2"
-const API_BASE_URL = "https://vyg-uganda-backend-189248540294.africa-south1.run.app";
+//const API_BASE_URL = "https://vyg-uganda-backend-189248540294.africa-south1.run.app";
+const API_BASE_URL = "http://localhost:8080";
 
 const activeCollectionAdapter = createEntityAdapter({ selectId: (data) => data.ky });
 
@@ -11,13 +12,15 @@ const baseQuery = fetchBaseQuery({
     baseUrl: API_BASE_URL,
     //credentials: "include",
     credentials: "omit",
-    prepareHeaders: (headers, { getState }) => {
+    prepareHeaders: (headers, { getState, endpoint }) => {
         // if user is authenticated, add auth token to request header
         const { va: accessToken } = getState().sharedstateslice?.active_collection?.entities?.access_token || {};
         if (typeof accessToken === "string") {
             headers.set("Authorization", `Bearer ${accessToken}`);
         }
-        headers.set("Content-Type", "application/json");
+        if (endpoint !== "fileUploader") {
+            headers.set("Content-Type", "application/json");
+        }
         return headers;
     },
 });
@@ -27,13 +30,15 @@ const refreshQuery = fetchBaseQuery({
     baseUrl: API_BASE_URL,
     //credentials: "include", // Fro web
     credentials: "omit", // For mobile
-    prepareHeaders: (headers, { getState }) => {
+    prepareHeaders: (headers, { getState, endpoint }) => {
         // if user is authenticated, add auth token to request header
         const { va: refreshToken } = getState().sharedstateslice?.active_collection?.entities?.refresh_token || {};
         if (typeof refreshToken === "string") {
             headers.set("Authorization", `Bearer ${refreshToken}`);
         }
-        headers.set("Content-Type", "application/json");
+        if (endpoint !== "fileUploader") {
+            headers.set("Content-Type", "application/json");
+        }
         return headers;
     },
 });
@@ -108,12 +113,8 @@ export const appiiSlice = createApi({
     baseQuery: baseQueryWithReauth,
     tagTypes: [
         "active_collection",
-        "profile",
-        "opportunity",
-        "application",
         "message",
         "user",
-        "notification"
     ],
     endpoints: (builder) => ({}),
 });
