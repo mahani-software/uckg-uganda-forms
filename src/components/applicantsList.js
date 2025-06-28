@@ -9,7 +9,7 @@ import DEFAULT_AVATAR2 from "../images/user.png";
 import CompanyLogo from '../images/vyg-uganda.jpeg';
 
 const ApplicantList = () => {
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState("");
     const [expandedId, setExpandedId] = useState(null);
     const [page, setPage] = useState(1);
     const containerRef = useRef(null);
@@ -24,9 +24,7 @@ const ApplicantList = () => {
 
     const applicants = useSelector(st => selectList(st, "applicant")) || [];
 
-    const filtered = applicants.filter(applicant =>
-        `${applicant.firstName} ${applicant.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = applicants.filter(applicant => `${applicant.firstName} ${applicant.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const toggleExpand = (id) => {
         setExpandedId(prev => (prev === id ? null : id));
@@ -55,7 +53,7 @@ const ApplicantList = () => {
                 <div className="border border-gray-100 mt-6 rounded-lg">
                     <div className="flex flex-row justify-between mb-4 p-4 bg-lime-100 rounded-t-lg">
                         <h1 className="text-4xl font-bold my-auto">{applicant.firstName} {applicant.lastName}</h1>
-                        <img src={DEFAULT_AVATAR2} alt="Applicant Avatar" className="w-24 h-24 rounded-lg border" />
+                        <img src={DEFAULT_AVATAR2} alt="Av" className="w-24 h-24 rounded-lg border" />
                     </div>
 
                     <dl className="space-y-2 p-4">
@@ -89,6 +87,18 @@ const ApplicantList = () => {
                         </div>
                     </dl>
                 </div>
+
+                <div className="w-full py-4">
+                    {applicant.courses?.length && (
+                        <div className="w-full"> Your chosen courses: </div>
+                    )}
+                    {applicant.courses?.map((course, index) => (
+                        <div key={index + 1} className="flex flex-row sm:flex-row justify-start gap-6">
+                            <span className="font-medium text-gray-600">{index + 1}</span>
+                            <span className="text-gray-800 ml-4"><b>{course.courseGuid?.courseName}</b></span>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     };
@@ -97,35 +107,6 @@ const ApplicantList = () => {
         setExpandedId(applicant.guid);
         setTimeout(() => window.print(), 100);
     };
-
-    // const handlePrint = async (applicant) => {
-    //     setExpandedId(applicant.guid);
-
-    //     await new Promise(r => setTimeout(r, 100));
-
-    //     const container = document.getElementById('printable-container');
-    //     const canvas = await html2canvas(container, { backgroundColor: null });
-    //     const imgData = canvas.toDataURL('image/png');
-
-    //     const printWindow = window.open('', '_blank');
-    //     printWindow.document.write(`
-    //       <html><head><title>Print</title>
-    //         <style>
-    //           body { margin: 0; padding: 0; text-align: center; }
-    //           img { max-width: 100%; }
-    //         </style>
-    //       </head>
-    //       <body><img src="${imgData}" /></body>
-    //       </html>
-    //     `);
-    //     printWindow.document.close();
-
-    //     printWindow.onload = () => {
-    //         printWindow.print();
-    //         printWindow.close();
-    //     };
-    // };
-
 
     const renderDetails = (applicant) => {
         const details = {
@@ -142,11 +123,13 @@ const ApplicantList = () => {
             'Challenge faced': applicant.description,
         };
 
+        console.log("applicant =", applicant)
+
         return (
             <>
                 <div className="bg-gray-50 px-3 py-4 rounded-b-md border-t border-gray-200">
                     <div className="flex items-center gap-4 mb-4">
-                        <img src={DEFAULT_AVATAR2} alt="Avatar" className="w-16 h-16 rounded-xl border border-gray-300" />
+                        <img src={applicant.photo?.url ? { uri: applicant.photo?.url } : DEFAULT_AVATAR2} alt="Av" className="w-16 h-16 rounded-xl border border-gray-300" />
                         <button
                             onClick={() => handlePrint(applicant)}
                             className="ml-auto bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition"
@@ -156,12 +139,21 @@ const ApplicantList = () => {
                     </div>
                     <dl className="space-y-2 text-sm text-gray-700">
                         {Object.entries(details).map(([key, value]) => (
-                            <div key={key} className="flex flex-col sm:flex-row sm:justify-between">
+                            <div key={key} className="flex flex-row justify-between">
                                 <dt className="font-medium text-gray-600">{key}</dt>
                                 <dd className="text-gray-800 ml-4"><b>{value}</b></dd>
                             </div>
                         ))}
                     </dl>
+                </div>
+                <div className="w-full p-3">
+                    <div className="w-full"> Courses:</div>
+                    {applicant.courses?.map((course, index) => (
+                        <div key={index + 1} className="flex flex-row sm:flex-row justify-start gap-6">
+                            <span className="font-medium text-gray-600">{index + 1}</span>
+                            <span className="text-gray-800 ml-4"><b>{course.courseGuid?.courseName}</b></span>
+                        </div>
+                    ))}
                 </div>
                 <div id="printable-section" className="hidden print:block bg-white p-6 text-sm">
                     {expandedId && renderPrintable(applicants.find(a => a.guid === expandedId))}

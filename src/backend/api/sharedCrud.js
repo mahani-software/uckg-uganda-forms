@@ -163,18 +163,17 @@ export const sharedCrudApi = appiiSlice.injectEndpoints({
         }
         return targetURL;
       },
-      transformResponse: ({ data }, _, { entity, filters }) => {
+      transformResponse: ({ data }, _, { entity }) => {
         const { list, pagination: { totalCount, totalPages, currentPage } = {} } = data || {};
-        const isOpportunityRecommendationRequest = (entity === "opportunity") && filters?.recommendByTags;
+        console.log("list =", list)
         const processedListData = (list || []).map(item => ({
           ...item,
-          seekerProfileId: isOpportunityRecommendationRequest ? filters?.profileId : undefined,
           createdAt: item.createdAt || sub(new Date(), { minutes: 1 }).toISOString(),
           created_at: item.created_at || sub(new Date(), { minutes: 1 }).toISOString(),
           reactions: item.reactions || { views: 0, likes: 0 }
         }));
         return {
-          entity: isOpportunityRecommendationRequest ? "opportunityrecommendation" : entity,
+          entity,
           Data: processedListData,
           totalCount,
           totalPages,

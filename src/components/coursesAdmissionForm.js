@@ -136,7 +136,6 @@ const CoursesAdmissionForm = () => {
             setStatus("✅ Applicant registered successfully!");
             setLoading(false);
         } else if (applicantRegFailed) {
-            console.error("Registration error:", applicantRegError);
             setStatus("❌ Failed to register applicant. Please try again.");
             setLoading(false);
         }
