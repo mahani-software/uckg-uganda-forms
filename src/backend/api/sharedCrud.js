@@ -122,8 +122,6 @@ export const sharedCrudApi = appiiSlice.injectEndpoints({
     itemRegistrer: builder.mutation({
       query: ({ entity, submissionEndpoint, data }) => {
         const url = `/${submissionEndpoint || entity}`
-        console.log("data =", data)
-        console.log("url =", url)
         return ({
           url,
           method: "POST",
@@ -165,7 +163,6 @@ export const sharedCrudApi = appiiSlice.injectEndpoints({
       },
       transformResponse: ({ data }, _, { entity }) => {
         const { list, pagination: { totalCount, totalPages, currentPage } = {} } = data || {};
-        console.log("list =", list)
         const processedListData = (list || []).map(item => ({
           ...item,
           createdAt: item.createdAt || sub(new Date(), { minutes: 1 }).toISOString(),

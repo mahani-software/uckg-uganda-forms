@@ -4,13 +4,16 @@ import { FloatingLabelInput } from "./floatingLabelInput"
 import { useFileUploaderMutation, useItemRegistrerMutation, useItemsListReaderQuery } from "../backend/api/sharedCrud"
 import { useSelector } from 'react-redux';
 import { selectList } from '../backend/features/sharedMainState';
-import FilesInput from './filesInput';
+import ProfileImageInput from './profilePhotoInput';
+import DocumentsInput from './documentsInput';
 
 const CoursesAdmissionForm = () => {
     const [status, setStatus] = useState("");
     const [loading, setLoading] = useState(false);
     const [preview, setPreview] = useState(null);
     const [photoLabel, setPhotoLabel] = useState('Profile Photo');
+    const [documentPickerLabel, setDocumentPickerLabel] = useState('Attach document(s)');
+    const [uploadedDocuments, setUploadedDocuments] = useState([]);
     const [photoUploadGuid, setPhotoUploadGuid] = useState(undefined);
     const [coursesAppliedFor, setCoursesAppliedFor] = useState([]);
     const [gender, setGender] = useState("");
@@ -105,6 +108,7 @@ const CoursesAdmissionForm = () => {
     }, [cachedCourses, cachedIntakes])
 
     //============= submit to Cloud Run ======================
+    //---- profile image ----
     const [uploadNewImage, {
         data: fileUploadSuccessResponse,
         isLoading: fileUploadProcessing,
@@ -113,7 +117,6 @@ const CoursesAdmissionForm = () => {
         error: fileUploadError,
     }] = useFileUploaderMutation()
     const { Data: { url, guid } = {} } = fileUploadSuccessResponse || {}
-
     useEffect(() => {
         if (fileUploadSucceeded && (guid || url)) {
             setPhotoUploadGuid(guid);
@@ -123,7 +126,29 @@ const CoursesAdmissionForm = () => {
             setStatus("❌ Photo upload failed");
         }
     }, [fileUploadSucceeded, fileUploadFailed]);
+    //------ documents --------
+    const [uploadNewDocument, {
+        data: docUploadSuccessResponse,
+        isLoading: docUploadProcessing,
+        isSuccess: docUploadSucceeded,
+        isError: docUploadFailed,
+        error: docUploadError,
+    }] = useFileUploaderMutation()
+    const { Data: { url: docUploadUrl, guid: docUploadGuid } = {} } = docUploadSuccessResponse || {}
+    useEffect(() => {
+        if (docUploadSucceeded && (docUploadGuid || docUploadUrl)) {
+            if (!uploadedDocuments.includes(docUploadGuid)) {
+                setUploadedDocuments([...uploadedDocuments, docUploadGuid]);
+                setStatus("✅ Document uploaded");
+            }
+        } else if (docUploadFailed) {
+            console.error("Upload error:", docUploadError);
+            setStatus("❌ Document upload failed");
+        }
+    }, [docUploadSucceeded, docUploadFailed]);
+    console.log("uploadedDocuments =", uploadedDocuments)
 
+    //------ applicant data -----
     const [submitNewApplicant, {
         data: applicantRegSuccessResponse,
         isLoading: applicantRegProcessing,
@@ -144,8 +169,6 @@ const CoursesAdmissionForm = () => {
     //============= /end submit to Cloud Run =================
 
     const handlePhotoChange = ({ file, formData }) => {
-        console.log("handlePhotoChange called")
-        // const file = e.target.files[0];
         if (file) {
             const previewUrl = URL.createObjectURL(file);
             setPreview(previewUrl);
@@ -161,8 +184,19 @@ const CoursesAdmissionForm = () => {
             setPhotoLabel("Profile Photo");
         }
     };
-    const triggerFileInput = () => {
-        fileInputRef.current?.click();
+
+    const handleDocumentAttachment = ({ file, formData }) => {
+        if (file) {
+            setDocumentPickerLabel("Add another document");
+            const fData = new FormData();
+            fData.set('file', file);
+            uploadNewDocument({
+                entity: "fileupload",
+                data: fData,
+            })
+        } else {
+            setDocumentPickerLabel("Attach document(s)");
+        }
     };
 
     //--------------
@@ -180,8 +214,6 @@ const CoursesAdmissionForm = () => {
         const dateOfBirth = formData.get('dobirth');
         const description = formData.get('description');
         const payload = {
-            // branchGuid,
-            // branchId,
             intakeGuid,
             courses: coursesAppliedFor,
             firstName,
@@ -196,6 +228,7 @@ const CoursesAdmissionForm = () => {
             dateOfBirth,
             description,
             photo: photoUploadGuid,
+            documents: uploadedDocuments,
         }
         console.log("payload =", payload)
         submitNewApplicant({ entity: "applicant", data: payload })
@@ -331,13 +364,23 @@ const CoursesAdmissionForm = () => {
                 )}
 
                 <div className="container mx-auto">
-                    <FilesInput
+                    <ProfileImageInput
                         uploadImageFn={({ file, formData }) => handlePhotoChange({ file, formData })}
                         uploadButtonLabel={photoLabel}
                         maxFiles={1}
                         maxFileSize={10}
-                        acceptedTypes={['image/*', 'application/pdf', '.doc', '.docx', '.txt']}
+                        acceptedTypes={['image/*']}
                         uploadImmediately={true}
+                    />
+                </div>
+
+                <div className="mx-auto">
+                    <DocumentsInput
+                        uploadDocumentFn={({ file, formData }) => handleDocumentAttachment({ file, formData })}
+                        uploadButtonLabel={documentPickerLabel}
+                        maxFiles={4}
+                        maxFileSize={8}
+                        acceptedDocTypes={['image/*', 'application/pdf', '.doc', '.docx', '.txt']}
                     />
                 </div>
 

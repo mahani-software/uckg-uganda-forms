@@ -6,7 +6,7 @@ import { Progress } from './ui/progress';
 import { useToast } from '../hooks/useToast';
 import FilePreview from './filePreview';
 
-const FilesInput = ({
+const ProfilePhotoInput = ({
     uploadImageFn,
     uploadButtonLabel,
     maxFiles = 10,
@@ -46,6 +46,7 @@ const FilesInput = ({
         });
     };
 
+    const acceptedTypesCount = acceptedTypes.length;
     const manageListOfFiles = useCallback(async (fileList) => {
         const newFiles = [];
         for (let i = 0; i < fileList.length && files.length + newFiles.length < maxFiles; i++) {
@@ -69,13 +70,15 @@ const FilesInput = ({
             });
         }
         setFiles(prev => [...prev, ...newFiles]);
-    }, [files.length, maxFiles, maxFileSize, acceptedTypes, toast]);
+    }, [files.length, maxFiles, maxFileSize, acceptedTypesCount, toast]);
 
     const uploadFile = async (uploadFile) => {
         const formData = new FormData();
         formData.append('file', uploadFile.file);
         setFiles(prev => prev.map(f => f.id === uploadFile.id ? { ...f, status: 'uploading', progress: 0 } : f));
-        uploadImageFn({ formData, file: uploadFile.file, fileId: uploadFile.id })
+        if (uploadImageFn) {
+            uploadImageFn({ formData, file: uploadFile.file, fileId: uploadFile.id })
+        }
     };
     const uploadAllFiles = async () => {
         const pendingFiles = files.filter(f => f.status === 'pending');
@@ -97,7 +100,9 @@ const FilesInput = ({
     const uploadFileImmediately = async (newFile) => {
         const formData = new FormData();
         formData.append('file', newFile);
-        uploadImageFn({ formData, file: newFile })
+        if (uploadImageFn) {
+            uploadImageFn({ formData, file: newFile })
+        }
     };
     const uploadManyFilesImmediately = async (newFiles) => {
         for (let i = 0; (i < newFiles.length); i++) {
@@ -227,17 +232,19 @@ const FilesInput = ({
                     <Upload className={`h-6 w-6 my-4 ${isDragOver ? 'text-blue-500' : 'text-lime-400'}`} />
                     <input
                         type="file"
-                        multiple
                         accept={acceptedTypes.join(',')}
                         onChange={(e) => {
                             handleFileInput(e)
                             uploadAllFiles()
                         }}
                         className="hidden"
-                        id="file-input"
+                        id="image-input"
+                        multiple
                     />
                     <Button
-                        onClick={() => document.getElementById('file-input')?.click()}
+                        onClick={() => {
+                            document.getElementById('image-input')?.click()
+                        }}
                         variant="outline"
                         className="text-blue-600 text-sm font-semibold border border-lime-400"
                     >
@@ -249,4 +256,4 @@ const FilesInput = ({
     );
 };
 
-export default FilesInput;
+export default ProfilePhotoInput;
