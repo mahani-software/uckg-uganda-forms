@@ -189,7 +189,7 @@ const DocumentsInput = ({
 
                         <div className="space-y-3 mt-3">
                             {files.map((file) => (
-                                <div key={file.id} className="flex items-center space-x-3 p-3 rounded-lg">
+                                <div key={file.id} className="flex items-center space-x-3 p-3 pl-0 rounded-lg">
                                     <FilePreview file={file.file} preview={file.preview} />
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium truncate">{file.file.name}</p>
