@@ -7,6 +7,7 @@ import { selectList } from "../backend/features/sharedMainState";
 import DEFAULT_AVATAR from "../images/userRounded.png";
 import DEFAULT_AVATAR2 from "../images/user.png";
 import CompanyLogo from '../images/vyg-uganda.jpeg';
+import DocumentList from './ui/documentList';
 
 const ApplicantList = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -123,6 +124,8 @@ const ApplicantList = () => {
         };
 
         console.log("applicant =", applicant)
+        const { documents = [] } = applicant || {}
+        console.log("[]-documents =", documents)
 
         return (
             <>
@@ -154,6 +157,9 @@ const ApplicantList = () => {
                         </div>
                     ))}
                 </div>
+
+                <DocumentList documents={documents.map(doc => doc.url)} />
+
                 <div id="printable-section" className="hidden print:block bg-white p-6 text-sm">
                     {expandedId && renderPrintable(applicants.find(a => a.guid === expandedId))}
                 </div>
