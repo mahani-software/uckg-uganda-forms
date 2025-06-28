@@ -53,7 +53,7 @@ const ApplicantList = () => {
                 <div className="border border-gray-100 mt-6 rounded-lg">
                     <div className="flex flex-row justify-between mb-4 p-4 bg-lime-100 rounded-t-lg">
                         <h1 className="text-4xl font-bold my-auto">{applicant.firstName} {applicant.lastName}</h1>
-                        <img src={DEFAULT_AVATAR2} alt="Av" className="w-24 h-24 rounded-lg border" />
+                        <img src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-24 h-24 rounded-lg border" />
                     </div>
 
                     <dl className="space-y-2 p-4">
