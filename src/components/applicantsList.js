@@ -53,7 +53,7 @@ const ApplicantList = () => {
                 <div className="border border-gray-100 mt-6 rounded-lg">
                     <div className="flex flex-row justify-between mb-4 p-4 bg-lime-100 rounded-t-lg">
                         <h1 className="text-4xl font-bold my-auto">{applicant.firstName} {applicant.lastName}</h1>
-                        <img src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-24 h-24 rounded-lg border" />
+                        <img src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-24 h-24 rounded-lg" />
                     </div>
 
                     <dl className="space-y-2 p-4">
@@ -128,7 +128,7 @@ const ApplicantList = () => {
             <>
                 <div className="bg-gray-50 px-3 py-4 rounded-b-md border-t border-gray-200">
                     <div className="flex items-center gap-4 mb-4">
-                        <img src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-16 h-16 rounded-xl border border-gray-300" />
+                        <img src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-16 h-16 rounded-xl" />
                         <button
                             onClick={() => handlePrint(applicant)}
                             className="ml-auto bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition"
