@@ -214,11 +214,11 @@ const ApplicantList = () => {
                                     onClick={() => toggleExpand(applicant.guid)}
                                     className="cursor-pointer hover:bg-gray-50 transition-colors"
                                 >
-                                    <td className="px-4 py-2 border-t border-t-gray-100">
+                                    <td className="px-4 py-2 border-t border-t-gray-400">
                                         <img
                                             src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR}
                                             alt="Avatar"
-                                            className="w-10 h-10 rounded-full border border-gray-300"
+                                            className="w-10 h-10 rounded-full border border-gray-100"
                                         />
                                     </td>
                                     <td className="px-4 py-2 border-t border-t-gray-600 text-sm text-gray-800">{applicant.firstName}</td>
