@@ -87,7 +87,6 @@ const ApplicantList = () => {
                         </div>
                     </dl>
                 </div>
-
                 <div className="w-full py-4">
                     {applicant.courses?.length && (
                         <div className="w-full"> Your chosen courses: </div>
@@ -129,7 +128,7 @@ const ApplicantList = () => {
             <>
                 <div className="bg-gray-50 px-3 py-4 rounded-b-md border-t border-gray-200">
                     <div className="flex items-center gap-4 mb-4">
-                        <img src={applicant.photo?.url ? { uri: applicant.photo?.url } : DEFAULT_AVATAR2} alt="Av" className="w-16 h-16 rounded-xl border border-gray-300" />
+                        <img src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-16 h-16 rounded-xl border border-gray-300" />
                         <button
                             onClick={() => handlePrint(applicant)}
                             className="ml-auto bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition"
