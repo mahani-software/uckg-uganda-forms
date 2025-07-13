@@ -415,7 +415,6 @@ const selectListx = (state, entity) => {
     //     console.warn(`Entity "${entity}" not found in state.`);
     //     return [];
     // }
-    // console.log("eee=entityData =", entityData);
     // const selector = mainAdaptors[entity]?.getSelectors(stt => stt.sharedstateslice[entity]);
     // if (!selector) {
     //     console.warn(`Selector for entity "${entity}" is not available.`);

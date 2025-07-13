@@ -23,8 +23,6 @@ const createSocket = (url) => {
 
     // Connection established
     socketInstance.on('connect', () => {
-        // console.log('Connected to WebSocket server');
-        // Send subscription message once connected
         try {
             const profileIDs = ["ofjvvbvbefoiorurbvbvb", "iuruirurhbo"];
             if (Array.isArray(profileIDs) && profileIDs.length > 0) {

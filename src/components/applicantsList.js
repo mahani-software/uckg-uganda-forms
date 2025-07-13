@@ -123,9 +123,7 @@ const ApplicantList = () => {
             'Challenge faced': applicant.description,
         };
 
-        console.log("applicant =", applicant)
         const { documents = [] } = applicant || {}
-        console.log("[]-documents =", documents)
 
         return (
             <>

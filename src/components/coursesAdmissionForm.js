@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import React, { useState, useRef, useEffect } from 'react';
 import { FloatingLabelInput } from "./floatingLabelInput"
 import { useFileUploaderMutation, useItemRegistrerMutation, useItemsListReaderQuery } from "../backend/api/sharedCrud"
@@ -19,8 +18,20 @@ const CoursesAdmissionForm = () => {
     const [gender, setGender] = useState("");
     const [maritalStatus, setMaritalStatus] = useState("");
     const [intakeGuid, setIntakeGuid] = useState('');
-    const [intakes, setIntakes] = useState([{ guid: "yrjjhrueuyry", year: "2024", month: "JUL" }, { guid: "ea3241435636dc23", year: "2025", month: "JUL" }, { guid: "ea3241435636daa21", year: "2026", month: "JUL" }]);          //TODO: fetched from backend
-    const [allCourses, setAllCourses] = useState([{ guid: "ea324241315ac", courseName: "Database admin" }, { guid: "ea324774322", courseName: "Accounting" }]);    //TODO: fetched from backend
+    const [intakes, setIntakes] = useState([{ guid: "yrjjhrueuyry", year: "2024", month: "JUL" }, { guid: "ea3241435636dc23", year: "2025", month: "JUL" }, { guid: "ea3241435636daa21", year: "2026", month: "JUL" }]);
+    const [allCourses, setAllCourses] = useState([{ guid: "ea324241315ac", courseName: "Database admin" }, { guid: "ea324774322", courseName: "Accounting" }]);
+    // New state variables for form inputs
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        phone: '',
+        email: '',
+        physicalAddress: '',
+        nationality: '',
+        nationalId: '',
+        dateOfBirth: '',
+        description: ''
+    });
     const fileInputRef = useRef(null);
 
     //============ submit to google sheets ===================
@@ -31,6 +42,7 @@ const CoursesAdmissionForm = () => {
         setStatus('');
         setLoading(true);
 
+        // Since handleSubmitToSheets still uses a <form>, we keep FormData here
         const formData = new FormData(e.target);
         const name = formData.get('name');
         const email = formData.get('email');
@@ -146,7 +158,6 @@ const CoursesAdmissionForm = () => {
             setStatus("❌ Document upload failed");
         }
     }, [docUploadSucceeded, docUploadFailed]);
-    console.log("uploadedDocuments =", uploadedDocuments)
 
     //------ applicant data -----
     const [submitNewApplicant, {
@@ -160,13 +171,32 @@ const CoursesAdmissionForm = () => {
         if (applicantRegSucceeded) {
             setStatus("✅ Applicant registered successfully!");
             setLoading(false);
+            // Reset form fields after successful submission
+            setFormData({
+                firstName: '',
+                lastName: '',
+                phone: '',
+                email: '',
+                physicalAddress: '',
+                nationality: '',
+                nationalId: '',
+                dateOfBirth: '',
+                description: ''
+            });
+            setIntakeGuid('');
+            setGender('');
+            setMaritalStatus('');
+            setCoursesAppliedFor([]);
+            setPhotoUploadGuid(undefined);
+            setUploadedDocuments([]);
+            setPreview(null);
+            setPhotoLabel('Profile Photo');
+            setDocumentPickerLabel('Attach document(s)');
         } else if (applicantRegFailed) {
             setStatus("❌ Failed to register applicant. Please try again.");
             setLoading(false);
         }
     }, [applicantRegSucceeded, applicantRegFailed]);
-
-    //============= /end submit to Cloud Run =================
 
     const handlePhotoChange = ({ file, formData }) => {
         if (file) {
@@ -199,46 +229,52 @@ const CoursesAdmissionForm = () => {
         }
     };
 
-    //--------------
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    //============= submit to Cloud Run ======================
     const handleSubmitToCloudRun = async (e) => {
         e.preventDefault();
         setStatus('');
-        const formData = new FormData(e.target);
-        const firstName = formData.get('firstname');
-        const lastName = formData.get('lastname');
-        const phone = formData.get('phone');
-        const email = formData.get('email');
-        const physicalAddress = formData.get('address');
-        const nationality = formData.get('nationality');
-        const nationalId = formData.get('nationalid');
-        const dateOfBirth = formData.get('dobirth');
-        const description = formData.get('description');
+        setLoading(true);
+
+        // Validate required fields
+        if (!formData.firstName || !formData.lastName || !intakeGuid || !gender || !maritalStatus) {
+            setStatus('Please fill out all required fields.');
+            setLoading(false);
+            return;
+        }
+
         const payload = {
             intakeGuid,
             courses: coursesAppliedFor,
-            firstName,
-            lastName,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
             gender,
-            phone,
-            email,
-            physicalAddress,
-            nationality,
-            nationalId,
+            phone: formData.phone,
+            email: formData.email,
+            physicalAddress: formData.physicalAddress,
+            nationality: formData.nationality,
+            nationalId: formData.nationalId,
             maritalStatus,
-            dateOfBirth,
-            description,
+            dateOfBirth: formData.dateOfBirth,
+            description: formData.description,
             photo: photoUploadGuid,
             documents: uploadedDocuments,
         }
-        console.log("payload =", payload)
         submitNewApplicant({ entity: "applicant", data: payload })
     }
-    //--------------
+    //============= /end submit to Cloud Run =================
 
     return (
         <div className="max-w-lg p-6 bg-white rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800"> Admit Course Applicant </h2>
-            <form onSubmit={handleSubmitToCloudRun} className="space-y-4">
+            <div className="space-y-4">
                 <div className="pr-2">
                     <label className="block mb-2 text-sm font-medium text-gray-700"> Intake </label>
                     <select
@@ -257,10 +293,22 @@ const CoursesAdmissionForm = () => {
                     </select>
                 </div>
                 <div>
-                    <FloatingLabelInput label="First name" name="firstname" required />
+                    <FloatingLabelInput
+                        label="First name"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        required
+                    />
                 </div>
                 <div>
-                    <FloatingLabelInput label="Last name" name="lastname" required />
+                    <FloatingLabelInput
+                        label="Last name"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        required
+                    />
                 </div>
                 <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">Gender</label>
@@ -277,13 +325,15 @@ const CoursesAdmissionForm = () => {
                     </select>
                 </div>
                 <div>
-                    <label htmlFor="dobirth" className="block mb-2 text-sm font-medium text-gray-700">
+                    <label htmlFor="dateOfBirth" className="block mb-2 text-sm font-medium text-gray-700">
                         Date of Birth
                     </label>
                     <input
                         type="date"
-                        name="dobirth"
-                        id="dobirth"
+                        name="dateOfBirth"
+                        id="dateOfBirth"
+                        value={formData.dateOfBirth}
+                        onChange={handleInputChange}
                         required
                         className="w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-lime-500 focus:border-lime-500"
                     />
@@ -291,7 +341,7 @@ const CoursesAdmissionForm = () => {
                 <div>
                     <label className="block mb-2 text-sm font-medium text-gray-700">Marital status</label>
                     <select
-                        name="maritalstatus"
+                        name="maritalStatus"
                         value={maritalStatus}
                         onChange={(e) => setMaritalStatus(e.target.value)}
                         required
@@ -307,22 +357,54 @@ const CoursesAdmissionForm = () => {
                     </select>
                 </div>
                 <div>
-                    <FloatingLabelInput label="Email" name="email" type="email" />
+                    <FloatingLabelInput
+                        label="Email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                    />
                 </div>
                 <div>
-                    <FloatingLabelInput label="Phone" name="phone" />
+                    <FloatingLabelInput
+                        label="Phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                    />
                 </div>
                 <div>
-                    <FloatingLabelInput label="Physical address" name="address" />
+                    <FloatingLabelInput
+                        label="Physical address"
+                        name="physicalAddress"
+                        value={formData.physicalAddress}
+                        onChange={handleInputChange}
+                    />
                 </div>
                 <div>
-                    <FloatingLabelInput label="Nationality" name="nationality" />
+                    <FloatingLabelInput
+                        label="Nationality"
+                        name="nationality"
+                        value={formData.nationality}
+                        onChange={handleInputChange}
+                    />
                 </div>
                 <div>
-                    <FloatingLabelInput label="National ID" name="nationalid" />
+                    <FloatingLabelInput
+                        label="National ID"
+                        name="nationalId"
+                        value={formData.nationalId}
+                        onChange={handleInputChange}
+                    />
                 </div>
                 <div>
-                    <FloatingLabelInput label="What challenge are you facing?" name="description" multiline={true} />
+                    <FloatingLabelInput
+                        label="What challenge are you facing?"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleInputChange}
+                        multiline={true}
+                    />
                 </div>
 
                 <div>
@@ -386,6 +468,7 @@ const CoursesAdmissionForm = () => {
 
                 <div>
                     <button
+                        onClick={handleSubmitToCloudRun}
                         type="submit"
                         disabled={applicantRegProcessing || loading}
                         className={`w-full mt-8 py-2 px-4 rounded-md text-white font-medium ${(applicantRegProcessing || loading)
@@ -396,7 +479,7 @@ const CoursesAdmissionForm = () => {
                         {(applicantRegProcessing || loading) ? 'Submitting...' : 'Submit'}
                     </button>
                 </div>
-            </form>
+            </div>
 
             {status && (
                 <div className={`mt-4 text-center text-sm font-medium px-4 py-2 rounded-md ${status.startsWith("✅") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>

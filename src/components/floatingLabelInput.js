@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const FloatingLabelInput = ({ label, name, type = "text", required = false, multiline = false }) => {
+const FloatingLabelInput = ({ label, name, type = "text", required = false, multiline = false, ...props }) => {
     const [value, setValue] = useState("");
 
     const isFloating = value.length > 0;
@@ -23,7 +23,12 @@ const FloatingLabelInput = ({ label, name, type = "text", required = false, mult
                     name={name}
                     required={required}
                     value={value}
-                    onChange={(e) => setValue(e.target.value)}
+                    onChange={(e) => {
+                        setValue(e.target.value);
+                        if(props.onChange){
+                            props.onChange(e)
+                        }
+                    }}
                     className="peer w-full border-b border-gray-300 bg-transparent text-gray-900 placeholder-transparent focus:outline-none focus:border-blue-600 py-2"
                     placeholder={label}
                 />
