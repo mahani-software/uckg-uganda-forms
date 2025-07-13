@@ -35,8 +35,6 @@ const App = () => {
     },
   });
 
-  console.log("----------")
-
   const showCard = (cardKey) => {
     if (cards[cardKey]) {
       setCards((prev) => ({
