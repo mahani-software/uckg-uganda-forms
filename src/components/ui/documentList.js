@@ -28,7 +28,7 @@ const DocumentList = ({ documents }) => {
             <div className="grid grid-cols-1">
                 <div className="text-lg"> Documents: </div>
                 {documents.map((doc, index) => {
-                    const fileType = doc.split('.').pop(); // Get file extension (e.g., 'pdf', 'doc')
+                    const fileType = doc?.split('.').pop(); // Get file extension (e.g., 'pdf', 'doc')
                     return (
                         <div
                             key={index}
@@ -38,7 +38,7 @@ const DocumentList = ({ documents }) => {
                             <div className="mr-4 rounded-lg shadow-lg bg-white">
                                 <FileIcon type={fileType} />
                             </div>
-                            <span className="text-gray-800">{doc.split('/').pop()}</span> {/* Display file name */}
+                            <span className="text-gray-800">{doc?.split('/').pop()}</span> {/* Display file name */}
                         </div>
                     );
                 })}

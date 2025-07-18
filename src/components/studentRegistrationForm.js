@@ -31,7 +31,7 @@ const StudentRegistrationForm = () => {
 
         const reader = new FileReader();
         reader.onloadend = async () => {
-            const base64 = reader.result.split(',')[1];
+            const base64 = reader.result?.split(',')[1];
 
             const payload = {
                 name,

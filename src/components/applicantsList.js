@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useItemsListReaderQuery } from '../backend/api/sharedCrud';
+import { useItemsListReaderQuery, useItemFieldsUpdaterMutation } from '../backend/api/sharedCrud';
 import { useSelector } from 'react-redux';
 import { selectList } from "../backend/features/sharedMainState";
-// import html2canvas from 'html2canvas';
-
 import DEFAULT_AVATAR from "../images/userRounded.png";
 import DEFAULT_AVATAR2 from "../images/user.png";
 import CompanyLogo from '../images/vyg-uganda.jpeg';
@@ -13,6 +11,9 @@ const ApplicantList = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [expandedId, setExpandedId] = useState(null);
     const [page, setPage] = useState(1);
+    const [editingId, setEditingId] = useState(null);
+    const [editForm, setEditForm] = useState({});
+    const [editCourses, setEditCourses] = useState([]);
     const containerRef = useRef(null);
     const lastScrollTop = useRef(0);
 
@@ -23,12 +24,75 @@ const ApplicantList = () => {
         error
     } = useItemsListReaderQuery({ entity: "applicant", limit: 100, page });
 
+    const {
+        isLoading: coursesLoading,
+        isSuccess: coursesSuccess,
+        isError: coursesError,
+        error: coursesErrorMsg
+    } = useItemsListReaderQuery({ entity: "course" });
+
+    const [updateApplicant, { isLoading: isUpdating, isError: isUpdateError, error: updateError }] = useItemFieldsUpdaterMutation();
+
     const applicants = useSelector(st => selectList(st, "applicant")) || [];
+    const courses = useSelector(st => selectList(st, "course")) || [];
 
     const filtered = applicants.filter(applicant => `${applicant.firstName} ${applicant.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const toggleExpand = (id) => {
         setExpandedId(prev => (prev === id ? null : id));
+        setEditingId(null); // Close edit mode when collapsing
+    };
+
+    const startEditing = (applicant) => {
+        setEditingId(applicant.guid);
+        setEditForm({
+            firstName: applicant.firstName,
+            lastName: applicant.lastName,
+            phone: applicant.phone,
+            email: applicant.email,
+            physicalAddress: applicant.physicalAddress,
+            nationality: applicant.nationality,
+            maritalStatus: applicant.maritalStatus,
+            dateOfBirth: new Date(applicant.dateOfBirth)?.toISOString()?.split('T')[0],
+            description: applicant.description,
+        });
+        setEditCourses(applicant.courses?.map(course => course.courseGuid?.guid) || []);
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleCourseChange = (courseGuid) => {
+        setEditCourses(prev =>
+            prev.includes(courseGuid)
+                ? prev.filter(id => id !== courseGuid)
+                : [...prev, courseGuid]
+        );
+    };
+
+    const handleSave = async (applicantId) => {
+        try {
+            await updateApplicant({
+                entity: "applicant",
+                guid: applicantId,
+                data: {
+                    ...editForm,
+                    courses: editCourses
+                }
+            }).unwrap();
+            setEditingId(null);
+            setEditCourses([]);
+        } catch (err) {
+            console.error("Failed to update applicant:", err);
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        setEditForm({});
+        setEditCourses([]);
     };
 
     const renderPrintable = (applicant) => {
@@ -48,7 +112,7 @@ const ApplicantList = () => {
                     You have been offered a place to study for free and learn hands-on skills
                     in the skilling program organised by the Universal Church of the Kingdom of God (UCKG) in Uganda,
                     through the Victory Youth Group (VYG). The details below will be used to track your attendance
-                    and to help you benefit best. For any inquiry, please contanct us on mobile: <b> +256 701 219644 </b>
+                    and to help you benefit best. For any inquiry, please contact us on mobile: <b> +256 701 219644 </b>
                 </div>
 
                 <div className="border border-gray-100 mt-6 rounded-lg">
@@ -119,23 +183,183 @@ const ApplicantList = () => {
             'Nationality': applicant.nationality,
             'National ID': applicant.nationalId,
             'Marital Status': applicant.maritalStatus,
-            'Date of Birth': new Date(applicant.dateOfBirth).toISOString().split('T')[0],
+            'Date of Birth': new Date(applicant.dateOfBirth)?.toISOString()?.split('T')[0],
             'Challenge faced': applicant.description,
         };
 
-        const { documents = [] } = applicant || {}
+        const { documents = [] } = applicant || {};
+
+        if (editingId === applicant.guid) {
+            return (
+                <div className="bg-gray-50 px-3 py-4 rounded-b-md border-t border-gray-200">
+                    <div className="flex items-center gap-4 mb-4">
+                        <img src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-16 h-16 rounded-xl" />
+                        <div className="ml-auto flex gap-2">
+                            <button
+                                onClick={() => handleSave(applicant.guid)}
+                                disabled={isUpdating}
+                                className="bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition disabled:opacity-50"
+                            >
+                                {isUpdating ? 'Saving...' : '💾 Save'}
+                            </button>
+                            <button
+                                onClick={cancelEdit}
+                                className="bg-gray-600 text-black text-sm px-4 py-2 rounded hover:bg-gray-700 transition border border-black"
+                            >
+                                ❌ Cancel
+                            </button>
+                        </div>
+                    </div>
+                    {isUpdateError && (
+                        <div className="text-red-500 mb-4">
+                            Error updating applicant: {updateError?.message || 'Unknown error'}
+                        </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">First Name</label>
+                            <input
+                                type="text"
+                                name="firstName"
+                                value={editForm.firstName || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Last Name</label>
+                            <input
+                                type="text"
+                                name="lastName"
+                                value={editForm.lastName || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Phone</label>
+                            <input
+                                type="text"
+                                name="phone"
+                                value={editForm.phone || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={editForm.email || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Address</label>
+                            <input
+                                type="text"
+                                name="physicalAddress"
+                                value={editForm.physicalAddress || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Nationality</label>
+                            <input
+                                type="text"
+                                name="nationality"
+                                value={editForm.nationality || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Marital Status</label>
+                            <select
+                                name="maritalStatus"
+                                value={editForm.maritalStatus || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            >
+                                <option value="">Select</option>
+                                <option value="Single">Single</option>
+                                <option value="Married">Married</option>
+                                <option value="Divorced">Divorced</option>
+                                <option value="Widowed">Widowed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Date of Birth</label>
+                            <input
+                                type="date"
+                                name="dateOfBirth"
+                                value={editForm.dateOfBirth || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div className="sm:col-span-2">
+                            <label className="block text-sm font-medium text-gray-600">Challenge Faced</label>
+                            <textarea
+                                name="description"
+                                value={editForm.description || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                                rows="4"
+                            />
+                        </div>
+                        <div className="sm:col-span-2">
+                            <label className="block text-sm font-medium text-gray-600">Course(s) Preferred</label>
+                            {coursesLoading && <div className="text-gray-500">Loading courses...</div>}
+                            {coursesError && (
+                                <div className="text-red-500">
+                                    Error loading courses: {coursesErrorMsg?.message || 'Unknown error'}
+                                </div>
+                            )}
+                            {coursesSuccess && (
+                                <div className="space-y-2">
+                                    {courses.map((course) => (
+                                        <label key={course.guid} className="flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                value={course.guid}
+                                                checked={editCourses.includes(course.guid)}
+                                                onChange={() => handleCourseChange(course.guid)}
+                                                className="rounded text-lime-600 focus:ring-lime-500"
+                                            />
+                                            <span>{course.courseName || course.guid}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
 
         return (
             <>
                 <div className="bg-gray-50 px-3 py-4 rounded-b-md border-t border-gray-200">
                     <div className="flex items-center gap-4 mb-4">
                         <img src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-16 h-16 rounded-xl" />
-                        <button
-                            onClick={() => handlePrint(applicant)}
-                            className="ml-auto bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition"
-                        >
-                            🖨️ Print
-                        </button>
+                        <div className="ml-auto flex gap-2">
+                            <button
+                                onClick={() => startEditing(applicant)}
+                                className="bg-yellow-600 text-black text-sm px-4 py-2 rounded hover:bg-yellow-700 transition border border-black"
+                            >
+                                ✏️ Edit
+                            </button>
+                            <button
+                                onClick={() => handlePrint(applicant)}
+                                className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition"
+                            >
+                                🖨️ Print
+                            </button>
+                        </div>
                     </div>
                     <dl className="space-y-2 text-sm text-gray-700">
                         {Object.entries(details).map(([key, value]) => (
