@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/uckg-uganda-forms/static/css/main.2e1a9d6e.css",
-    "main.js": "/uckg-uganda-forms/static/js/main.59e623a1.js",
+    "main.js": "/uckg-uganda-forms/static/js/main.fc5a8ca3.js",
     "static/js/488.f19c54d0.chunk.js": "/uckg-uganda-forms/static/js/488.f19c54d0.chunk.js",
     "static/media/vyg-uganda.jpeg": "/uckg-uganda-forms/static/media/vyg-uganda.8ccbe0fbd9ba160194ff.jpeg",
     "static/media/userRounded.png": "/uckg-uganda-forms/static/media/userRounded.2c1a8d058011c6ba04ca.png",
@@ -9,11 +9,11 @@
     "static/media/vyg.jpeg": "/uckg-uganda-forms/static/media/vyg.d244bdc147ec03e10a15.jpeg",
     "index.html": "/uckg-uganda-forms/index.html",
     "main.2e1a9d6e.css.map": "/uckg-uganda-forms/static/css/main.2e1a9d6e.css.map",
-    "main.59e623a1.js.map": "/uckg-uganda-forms/static/js/main.59e623a1.js.map",
+    "main.fc5a8ca3.js.map": "/uckg-uganda-forms/static/js/main.fc5a8ca3.js.map",
     "488.f19c54d0.chunk.js.map": "/uckg-uganda-forms/static/js/488.f19c54d0.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.2e1a9d6e.css",
-    "static/js/main.59e623a1.js"
+    "static/js/main.fc5a8ca3.js"
   ]
 }
