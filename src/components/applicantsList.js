@@ -372,7 +372,7 @@ const ApplicantList = () => {
                 </div>
                 <div className="w-full p-3">
                     <div className="w-full"> Courses:</div>
-                    {applicant.courses?.map((course, index) => (
+                    {applicant.courses?.filter(crs => crs.courseGuid)?.map((course, index) => (
                         <div key={index + 1} className="flex flex-row sm:flex-row justify-start gap-6">
                             <span className="font-medium text-gray-600">{index + 1}</span>
                             <span className="text-gray-800 ml-4"><b>{course.courseGuid?.courseName}</b></span>
