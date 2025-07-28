@@ -398,33 +398,33 @@ const ApplicantList = () => {
         );
     };
 
-    useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
+    // useEffect(() => {
+    //     const el = containerRef.current;
+    //     if (!el) return;
 
-        const handleScroll = () => {
-            const { scrollTop, scrollHeight, clientHeight } = el;
-            const goingDown = scrollTop > lastScrollTop.current;
-            lastScrollTop.current = scrollTop;
+    //     const handleScroll = () => {
+    //         const { scrollTop, scrollHeight, clientHeight } = el;
+    //         const goingDown = scrollTop > lastScrollTop.current;
+    //         lastScrollTop.current = scrollTop;
 
-            if (scrollTop + clientHeight >= scrollHeight - 50 && goingDown) {
-                setPage(prev => {
-                    const newPage = prev + 1;
-                    setInputPage(String(newPage));
-                    return newPage;
-                });
-            } else if (scrollTop <= 50 && !goingDown && page > 1) {
-                setPage(prev => {
-                    const newPage = prev - 1;
-                    setInputPage(String(newPage));
-                    return newPage;
-                });
-            }
-        };
+    //         if (scrollTop + clientHeight >= scrollHeight - 50 && goingDown) {
+    //             setPage(prev => {
+    //                 const newPage = prev + 1;
+    //                 setInputPage(String(newPage));
+    //                 return newPage;
+    //             });
+    //         } else if (scrollTop <= 50 && !goingDown && page > 1) {
+    //             setPage(prev => {
+    //                 const newPage = prev - 1;
+    //                 setInputPage(String(newPage));
+    //                 return newPage;
+    //             });
+    //         }
+    //     };
 
-        el.addEventListener('scroll', handleScroll);
-        return () => el.removeEventListener('scroll', handleScroll);
-    }, [page]);
+    //     el.addEventListener('scroll', handleScroll);
+    //     return () => el.removeEventListener('scroll', handleScroll);
+    // }, [page]);
 
     return (
         <div className="w-full mx-auto p-6 bg-white rounded-xl shadow-lg md:max-w-[500px]">
