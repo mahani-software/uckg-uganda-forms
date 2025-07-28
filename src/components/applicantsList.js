@@ -11,6 +11,7 @@ const ApplicantList = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [expandedId, setExpandedId] = useState(null);
     const [page, setPage] = useState(1);
+    const [inputPage, setInputPage] = useState("1");
     const [editingId, setEditingId] = useState(null);
     const [editForm, setEditForm] = useState({});
     const [editCourses, setEditCourses] = useState([]);
@@ -93,6 +94,14 @@ const ApplicantList = () => {
         setEditingId(null);
         setEditForm({});
         setEditCourses([]);
+    };
+
+    const handlePageInputChange = (e) => {
+        const value = e.target.value;
+        setInputPage(value);
+        if (value === "" || isNaN(value) || parseInt(value) < 1) return;
+        const newPage = parseInt(value);
+        setPage(newPage);
     };
 
     const renderPrintable = (applicant) => {
@@ -399,9 +408,17 @@ const ApplicantList = () => {
             lastScrollTop.current = scrollTop;
 
             if (scrollTop + clientHeight >= scrollHeight - 50 && goingDown) {
-                setPage(prev => prev + 1);
+                setPage(prev => {
+                    const newPage = prev + 1;
+                    setInputPage(String(newPage));
+                    return newPage;
+                });
             } else if (scrollTop <= 50 && !goingDown && page > 1) {
-                setPage(prev => prev - 1);
+                setPage(prev => {
+                    const newPage = prev - 1;
+                    setInputPage(String(newPage));
+                    return newPage;
+                });
             }
         };
 
@@ -413,14 +430,26 @@ const ApplicantList = () => {
         <div className="w-full mx-auto p-6 bg-white rounded-xl shadow-lg md:max-w-[500px]">
             <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">Applicants List</h2>
 
-            <div className="mb-4">
-                <input
-                    type="text"
-                    placeholder="Search by name..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
-                />
+            <div className="flex gap-4 mb-4">
+                <div className="flex-1">
+                    <input
+                        type="text"
+                        placeholder="Search by name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                    />
+                </div>
+                <div>
+                    <input
+                        type="number"
+                        min="1"
+                        value={inputPage}
+                        onChange={handlePageInputChange}
+                        className="w-20 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                        placeholder="Page"
+                    />
+                </div>
             </div>
 
             <div

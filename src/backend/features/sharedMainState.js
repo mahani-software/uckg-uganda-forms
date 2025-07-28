@@ -195,7 +195,7 @@ const mainSlice = createSlice({
                 (state, { payload: { entity, Data } }) => {
                     try {
                         if (entity) {
-                            mainAdaptors[entity].upsertMany(state[entity], Data);
+                            mainAdaptors[entity].setAll(state[entity], Data);
                         }
                         if (entity === "message") {
                             const activeChatPivot = useSelector(st => selectOneItemByGuid(st, "active_collection", "activechatpivot"))
@@ -249,7 +249,7 @@ const mainSlice = createSlice({
                 (state, { payload: { entity, Data } }) => {
                     try {
                         if (entity) {
-                            mainAdaptors[entity].upsertMany(state[entity], Data);
+                            mainAdaptors[entity].setAll(state[entity], Data);
                         }
                         if (entity === "message") {
                             const activeChatPivot = useSelector(st => selectOneItemByGuid(st, "active_collection", "activechatpivot"))
