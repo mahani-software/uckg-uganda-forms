@@ -188,8 +188,8 @@ export const sharedCrudApi = appiiSlice.injectEndpoints({
           const params = searchParams.toString();
           targetURL = `/${entity}?page=${page}&limit=${max}&${params}`
         }
-        console.log("____________________________________")
-        console.log("<<>>>-targetURL =", targetURL)
+        // console.log("____________________________________")
+        // console.log("<<>>>-targetURL =", targetURL)
         return ({
           url: targetURL,
           method: "GET",
@@ -206,7 +206,7 @@ export const sharedCrudApi = appiiSlice.injectEndpoints({
           reactions: item.reactions || { views: 0, likes: 0 }
         }));
 
-        console.log("<<>>>-processedListData =", processedListData)
+        // console.log("<<>>>-processedListData =", processedListData)
 
         return {
           entity: isOpportunityRecommendationRequest ? "opportunityrecommendation" : entity,
