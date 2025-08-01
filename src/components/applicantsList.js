@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useItemsListReaderQuery, useItemFieldsUpdaterMutation } from '../backend/api/sharedCrud';
 import { useSelector } from 'react-redux';
 import { selectList } from "../backend/features/sharedMainState";
@@ -9,6 +9,8 @@ import DocumentList from './ui/documentList';
 
 const ApplicantList = () => {
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCourse, setSelectedCourse] = useState("");
+    const [selectedSemester, setSelectedSemester] = useState("");
     const [expandedId, setExpandedId] = useState(null);
     const [page, setPage] = useState(1);
     const [inputPage, setInputPage] = useState("1");
@@ -18,12 +20,24 @@ const ApplicantList = () => {
     const containerRef = useRef(null);
     const lastScrollTop = useRef(0);
 
+    // Build query filters
+    const filters = useMemo(() => {
+        const filterObj = {};
+        if (selectedCourse) filterObj.courseGuid = selectedCourse;
+        if (selectedSemester) {
+            const [year, month] = selectedSemester.split('-');
+            filterObj.intakeGuid = { year, month };
+        }
+        return filterObj;
+    }, [selectedCourse, selectedSemester]);
+
     const {
         isLoading,
         isSuccess,
         isError,
-        error
-    } = useItemsListReaderQuery({ entity: "applicant", limit: 100, page });
+        error,
+        refetch
+    } = useItemsListReaderQuery({ entity: "applicant", limit: 100, page, filters });
 
     const {
         isLoading: coursesLoading,
@@ -37,7 +51,45 @@ const ApplicantList = () => {
     const applicants = useSelector(st => selectList(st, "applicant")) || [];
     const courses = useSelector(st => selectList(st, "course")) || [];
 
-    const filtered = applicants.filter(applicant => `${applicant.firstName} ${applicant.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()));
+    // Extract unique semesters from applicants
+    const semesters = [...new Set(
+        applicants.map(applicant => 
+            applicant.intakeGuid ? `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}` : null
+        ).filter(Boolean)
+    )].sort();
+
+    // Filter applicants by search term (all fields), course, and semester
+    const filtered = applicants.filter(applicant => {
+        const searchLower = searchTerm.toLowerCase();
+        const fieldsToSearch = [
+            applicant.firstName || '',
+            applicant.lastName || '',
+            applicant.applicantId || '',
+            applicant.email || '',
+            applicant.phone || '',
+            applicant.gender || '',
+            applicant.nationality || '',
+            applicant.physicalAddress || '',
+            applicant.intakeGuid ? `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}` : '',
+            applicant.courses
+                ?.filter(crs => crs.courseGuid)
+                .map(crs => crs.courseGuid.courseName)
+                .join(', ') || '',
+            new Date(applicant.dateOfBirth)?.toISOString()?.split('T')[0] || '',
+            applicant.maritalStatus || '',
+            applicant.nationalId || '',
+            applicant.description || ''
+        ];
+        const matchesSearch = !searchTerm || fieldsToSearch.some(field => 
+            field.toLowerCase().includes(searchLower)
+        );
+        const matchesCourse = !selectedCourse || 
+            applicant.courses?.some(course => course.courseGuid?.guid === selectedCourse);
+        const matchesSemester = !selectedSemester || 
+            (applicant.intakeGuid && 
+             `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}` === selectedSemester);
+        return matchesSearch && matchesCourse && matchesSemester;
+    });
 
     const toggleExpand = (id) => {
         setExpandedId(prev => (prev === id ? null : id));
@@ -184,7 +236,7 @@ const ApplicantList = () => {
     const renderDetails = (applicant) => {
         const details = {
             'Applicant ID': applicant.applicantId,
-            'Intake': `${applicant.intakeGuid?.year} - ${applicant.intakeGuid?.month}`,
+            'Intake': applicant.intakeGuid ? `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}` : 'N/A',
             'Gender': applicant.gender,
             'Phone': applicant.phone,
             'Email': applicant.email,
@@ -193,7 +245,7 @@ const ApplicantList = () => {
             'National ID': applicant.nationalId,
             'Marital Status': applicant.maritalStatus,
             'Date of Birth': new Date(applicant.dateOfBirth)?.toISOString()?.split('T')[0],
-            'Challenge faced': applicant.description,
+            'Challenge Faced': applicant.description,
         };
 
         const { documents = [] } = applicant || {};
@@ -374,7 +426,7 @@ const ApplicantList = () => {
                         {Object.entries(details).map(([key, value]) => (
                             <div key={key} className="flex flex-row justify-between">
                                 <dt className="font-medium text-gray-600">{key}</dt>
-                                <dd className="text-gray-800 ml-4"><b>{value}</b></dd>
+                                <dd className="text-gray-800 ml-4"><b>{value || 'N/A'}</b></dd>
                             </div>
                         ))}
                     </dl>
@@ -398,70 +450,90 @@ const ApplicantList = () => {
         );
     };
 
-    // useEffect(() => {
-    //     const el = containerRef.current;
-    //     if (!el) return;
-
-    //     const handleScroll = () => {
-    //         const { scrollTop, scrollHeight, clientHeight } = el;
-    //         const goingDown = scrollTop > lastScrollTop.current;
-    //         lastScrollTop.current = scrollTop;
-
-    //         if (scrollTop + clientHeight >= scrollHeight - 50 && goingDown) {
-    //             setPage(prev => {
-    //                 const newPage = prev + 1;
-    //                 setInputPage(String(newPage));
-    //                 return newPage;
-    //             });
-    //         } else if (scrollTop <= 50 && !goingDown && page > 1) {
-    //             setPage(prev => {
-    //                 const newPage = prev - 1;
-    //                 setInputPage(String(newPage));
-    //                 return newPage;
-    //             });
-    //         }
-    //     };
-
-    //     el.addEventListener('scroll', handleScroll);
-    //     return () => el.removeEventListener('scroll', handleScroll);
-    // }, [page]);
-
     return (
         <div className="w-full mx-auto p-6 bg-white rounded-xl shadow-lg md:max-w-[500px]">
             <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">Applicants List</h2>
 
-            <div className="flex gap-4 mb-4">
-                <div className="flex-1">
-                    <input
-                        type="text"
-                        placeholder="Search by name..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
-                    />
+            <div className="space-y-4 mb-4">
+                <div className="flex gap-4">
+                    <div className="flex-1">
+                        <input
+                            type="text"
+                            placeholder="Search by any field..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="number"
+                            min="1"
+                            value={inputPage}
+                            onChange={handlePageInputChange}
+                            className="w-20 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            placeholder="Page"
+                            disabled={isLoading}
+                        />
+                    </div>
                 </div>
                 <div>
-                    <input
-                        type="number"
-                        min="1"
-                        value={inputPage}
-                        onChange={handlePageInputChange}
-                        className="w-20 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
-                        placeholder="Page"
-                    />
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Filter by Course</label>
+                    <select
+                        value={selectedCourse}
+                        onChange={(e) => setSelectedCourse(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                        disabled={coursesLoading}
+                    >
+                        <option value="">All Courses</option>
+                        {courses.map(course => (
+                            <option key={course.guid} value={course.guid}>{course.courseName}</option>
+                        ))}
+                    </select>
+                    {coursesError && (
+                        <div className="text-red-500 text-sm mt-1">
+                            Error loading courses: {coursesErrorMsg?.message || 'Unknown error'}
+                        </div>
+                    )}
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Filter by Semester</label>
+                    <select
+                        value={selectedSemester}
+                        onChange={(e) => setSelectedSemester(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                        disabled={isLoading}
+                    >
+                        <option value="">All Semesters</option>
+                        {semesters.map(semester => (
+                            <option key={semester} value={semester}>{semester}</option>
+                        ))}
+                    </select>
                 </div>
             </div>
 
             <div
                 ref={containerRef}
-                className="overflow-auto border border-gray-200 rounded-md max-h-[70vh]"
+                className="overflow-x-auto border border-gray-200 rounded-md max-h-[70vh]"
             >
-                <table className="min-w-full table-auto">
-                    <thead className="sticky top-0 bg-gray-100 z-10 bg-zinc-200">
+                <table className="min-w-[1000px] table-auto">
+                    <thead className="sticky top-0 bg-zinc-200">
                         <tr>
-                            <th className="text-left px-4 py-3 border-b border-b-gray-600 font-medium text-gray-700">Photo</th>
-                            <th className="text-left px-4 py-3 border-b border-b-gray-600 font-medium text-gray-700">First Name</th>
-                            <th className="text-left px-4 py-3 border-b border-b-gray-600 font-medium text-gray-700">Last Name</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Photo</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">First Name</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Last Name</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Applicant ID</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Email</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Phone</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Gender</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Nationality</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Address</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Semester</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Courses</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Date of Birth</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Marital Status</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">National ID</th>
+                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Challenge Faced</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -471,26 +543,48 @@ const ApplicantList = () => {
                                     onClick={() => toggleExpand(applicant.guid)}
                                     className="cursor-pointer hover:bg-gray-50 transition-colors"
                                 >
-                                    <td className="px-4 py-2 border-t border-t-gray-400">
+                                    <td className="px-4 py-2 border-t border-gray-400">
                                         <img
                                             src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR}
                                             alt="Avatar"
                                             className="w-10 h-10 rounded-full"
+                                            onError={(e) => (e.target.src = DEFAULT_AVATAR)}
                                         />
                                     </td>
-                                    <td className="px-4 py-2 border-t border-t-gray-600 text-sm text-gray-800"> {applicant.firstName} </td>
-                                    <td className="px-4 py-2 border-t border-t-gray-600 text-sm text-gray-800"> {applicant.lastName} </td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.firstName || 'N/A'}</td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.lastName || 'N/A'}</td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.applicantId || 'N/A'}</td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.email || 'N/A'}</td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.phone || 'N/A'}</td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.gender || 'N/A'}</td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.nationality || 'N/A'}</td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.physicalAddress || 'N/A'}</td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">
+                                        {applicant.intakeGuid ? `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}` : 'N/A'}
+                                    </td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">
+                                        {applicant.courses
+                                            ?.filter(crs => crs.courseGuid)
+                                            .map(crs => crs.courseGuid.courseName)
+                                            .join(', ') || 'N/A'}
+                                    </td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">
+                                        {new Date(applicant.dateOfBirth)?.toISOString()?.split('T')[0] || 'N/A'}
+                                    </td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.maritalStatus || 'N/A'}</td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.nationalId || 'N/A'}</td>
+                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.description || 'N/A'}</td>
                                 </tr>
                                 {expandedId === applicant.guid && (
                                     <tr className="bg-white">
-                                        <td colSpan="3">{renderDetails(applicant)}</td>
+                                        <td colSpan="15">{renderDetails(applicant)}</td>
                                     </tr>
                                 )}
                             </React.Fragment>
                         ))}
                         {!filtered.length && !isLoading && (
                             <tr>
-                                <td colSpan="3" className="text-center py-4 text-gray-500">No applicants found.</td>
+                                <td colSpan="15" className="text-center py-4 text-gray-500">No applicants found.</td>
                             </tr>
                         )}
                     </tbody>

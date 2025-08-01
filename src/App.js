@@ -5,6 +5,7 @@ import CoursesAdmissionForm from './components/coursesAdmissionForm';
 import MemberRegistrationForm from './components/memberRegistrationForm';
 import StudentRegistrationForm from "./components/studentRegistrationForm"
 import ApplicantList from "./components/applicantsList"
+import ApplicantListDownload from "./components/applicantsListDownload"
 import Header from './components/header';
 import Footer from './components/footer';
 import CompanyLogo from './images/vyg-uganda.jpeg';
@@ -33,6 +34,12 @@ const App = () => {
       visible: false,
       component: ApplicantList
     },
+    // applicantListDownload: {
+    //   key: "applicantListDownload",
+    //   visible: false,
+    //   component: ApplicantListDownload
+    // },
+    
   });
 
   const showCard = (cardKey) => {

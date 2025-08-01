@@ -22,6 +22,7 @@ const RightDrawer = ({ showCard, hideCard, visibleCards, menuOpen, setMenuOpen }
           { key: 'studentRegistrationForm', label: 'Student registration' },
           { key: 'memberRegistrationForm', label: 'Members' },
           { key: 'applicantListTable', label: 'Applicants List' },
+          // { key: 'applicantListDownload', label: 'Filtered lists (download)' },
 
         ].map(({ key, label }) => (
           <div
