@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useItemsListReaderQuery, useItemFieldsUpdaterMutation } from '../backend/api/sharedCrud';
+import { useItemsListReaderQuery, useItemsListReadrMutation, useItemFieldsUpdaterMutation } from '../backend/api/sharedCrud';
 import { useSelector } from 'react-redux';
 import { selectList } from "../backend/features/sharedMainState";
 import DEFAULT_AVATAR from "../images/userRounded.png";
@@ -23,7 +23,9 @@ const ApplicantList = () => {
     // Build query filters
     const filters = useMemo(() => {
         const filterObj = {};
-        if (selectedCourse) filterObj.courseGuid = selectedCourse;
+        if (selectedCourse) {
+            filterObj.courseGuid = selectedCourse;
+        }
         if (selectedSemester) {
             const [year, month] = selectedSemester.split('-');
             filterObj.intakeGuid = { year, month };
@@ -31,13 +33,26 @@ const ApplicantList = () => {
         return filterObj;
     }, [selectedCourse, selectedSemester]);
 
-    const {
+    const [fetchApplicantsFn, {
         isLoading,
         isSuccess,
         isError,
         error,
         refetch
-    } = useItemsListReaderQuery({ entity: "applicant", limit: 100, page, filters });
+    }] = useItemsListReadrMutation();
+
+    const [previousCourseFilter, setPreviousCourseFilter] = useState(undefined)
+    const [previousPage, setPreviousPage] = useState(0)
+    useEffect(() => {
+        if(selectedCourse !== previousCourseFilter){
+            fetchApplicantsFn({ entity: "applicant", limit: 500, page, filters })
+            setPreviousCourseFilter(selectedCourse)
+        }
+        if(page !== previousPage){
+            fetchApplicantsFn({ entity: "applicant", limit: 500, page, filters })
+            setPreviousPage(page)
+        }
+    },[selectedCourse, page])
 
     const {
         isLoading: coursesLoading,
@@ -83,12 +98,9 @@ const ApplicantList = () => {
         const matchesSearch = !searchTerm || fieldsToSearch.some(field => 
             field.toLowerCase().includes(searchLower)
         );
-        const matchesCourse = !selectedCourse || 
-            applicant.courses?.some(course => course.courseGuid?.guid === selectedCourse);
-        const matchesSemester = !selectedSemester || 
-            (applicant.intakeGuid && 
-             `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}` === selectedSemester);
-        return matchesSearch && matchesCourse && matchesSemester;
+        const matchesCourse = !selectedCourse || applicant.courses?.some(course => course.courseGuid?.guid === selectedCourse);
+        const matchesSemester = !selectedSemester || (applicant.intakeGuid && `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}` === selectedSemester);
+        return matchesSearch && matchesSemester;
     });
 
     const toggleExpand = (id) => {
