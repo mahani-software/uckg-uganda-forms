@@ -242,7 +242,12 @@ const ApplicantList = () => {
 
     const handlePrint = (applicant) => {
         setExpandedId(applicant.guid);
-        setTimeout(() => window.print(), 100);
+        setTimeout(() => window.print(), 500); // Increased delay to ensure rendering
+    };
+
+    const handlePrintList = () => {
+        setExpandedId(null); // Ensure individual applicant details are not printed
+        setTimeout(() => window.print(), 500); // Delay to allow table rendering
     };
 
     const renderDetails = (applicant) => {
@@ -464,9 +469,61 @@ const ApplicantList = () => {
 
     return (
         <div className="w-full mx-auto p-6 bg-white rounded-xl shadow-lg md:max-w-[500px]">
-            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">Applicants List</h2>
+            <style jsx>{`
+                @media print {
+                    body {
+                        visibility: hidden;
+                    }
+                    #printable-list {
+                        visibility: visible;
+                        position: static;
+                        width: 100%;
+                        padding: 20px;
+                    }
+                    #printable-list table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 12pt;
+                    }
+                    #printable-list th, #printable-list td {
+                        border: 1px solid black;
+                        padding: 8px;
+                        text-align: left;
+                        visibility: visible;
+                    }
+                    #printable-list img {
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                    }
+                    #printable-list .header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 20px;
+                    }
+                    #printable-list .header img {
+                        width: 60px;
+                        height: auto;
+                    }
+                    #printable-list .header .title {
+                        text-align: right;
+                    }
+                    #printable-list .header .title h1 {
+                        font-size: 24pt;
+                        font-weight: bold;
+                    }
+                    #printable-list .header .title h2 {
+                        font-size: 18pt;
+                    }
+                    #printable-section, .no-print {
+                        display: none !important;
+                    }
+                }
+            `}</style>
+            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800 no-print">Applicants List</h2>
 
-            <div className="space-y-4 mb-4">
+            <div className="space-y-4 mb-4 no-print">
                 <div className="flex gap-4">
                     <div className="flex-1">
                         <input
@@ -522,30 +579,35 @@ const ApplicantList = () => {
                         ))}
                     </select>
                 </div>
+                <div className="flex justify-end">
+                    <button
+                        onClick={handlePrintList}
+                        className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition"
+                    >
+                        🖨️ Print List
+                    </button>
+                </div>
             </div>
 
             <div
+                id="printable-list"
                 ref={containerRef}
                 className="overflow-x-auto border border-gray-200 rounded-md max-h-[70vh]"
             >
-                <table className="min-w-[1000px] table-auto">
+                <div className="header print:block hidden">
+                    <img src={CompanyLogo} alt="Company Logo" />
+                    <div className="title">
+                        <h1>Free short courses</h1>
+                        <h2>Applicants List</h2>
+                    </div>
+                </div>
+                <table className="min-w-[500px] table-auto">
                     <thead className="sticky top-0 bg-zinc-200">
                         <tr>
                             <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Photo</th>
                             <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">First Name</th>
                             <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Last Name</th>
                             <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Applicant ID</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Email</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Phone</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Gender</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Nationality</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Address</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Semester</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Courses</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Date of Birth</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Marital Status</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">National ID</th>
-                            <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Challenge Faced</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -566,46 +628,26 @@ const ApplicantList = () => {
                                     <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.firstName || 'N/A'}</td>
                                     <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.lastName || 'N/A'}</td>
                                     <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.applicantId || 'N/A'}</td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.email || 'N/A'}</td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.phone || 'N/A'}</td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.gender || 'N/A'}</td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.nationality || 'N/A'}</td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.physicalAddress || 'N/A'}</td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">
-                                        {applicant.intakeGuid ? `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}` : 'N/A'}
-                                    </td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">
-                                        {applicant.courses
-                                            ?.filter(crs => crs.courseGuid)
-                                            .map(crs => crs.courseGuid.courseName)
-                                            .join(', ') || 'N/A'}
-                                    </td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">
-                                        {new Date(applicant.dateOfBirth)?.toISOString()?.split('T')[0] || 'N/A'}
-                                    </td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.maritalStatus || 'N/A'}</td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.nationalId || 'N/A'}</td>
-                                    <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.description || 'N/A'}</td>
                                 </tr>
                                 {expandedId === applicant.guid && (
-                                    <tr className="bg-white">
-                                        <td colSpan="15">{renderDetails(applicant)}</td>
+                                    <tr className="bg-white no-print">
+                                        <td colSpan="4">{renderDetails(applicant)}</td>
                                     </tr>
                                 )}
                             </React.Fragment>
                         ))}
                         {!filtered.length && !isLoading && (
                             <tr>
-                                <td colSpan="15" className="text-center py-4 text-gray-500">No applicants found.</td>
+                                <td colSpan="4" className="text-center py-4 text-gray-500">No applicants found.</td>
                             </tr>
                         )}
                     </tbody>
                 </table>
                 {isLoading && (
-                    <div className="text-center py-4 text-gray-500">Loading...</div>
+                    <div className="text-center py-4 text-gray-500 no-print">Loading...</div>
                 )}
                 {isError && (
-                    <div className="text-center py-4 text-red-500">
+                    <div className="text-center py-4 text-red-500 no-print">
                         ❌ Error: {error?.message || 'Failed to load applicants.'}
                     </div>
                 )}
