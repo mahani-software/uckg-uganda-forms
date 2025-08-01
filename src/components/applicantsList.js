@@ -404,7 +404,7 @@ const ApplicantList = () => {
 
         return (
             <>
-                <div className="bg-gray-50 px-3 py-4 rounded-b-md border-t border-gray-200">
+                <div className="bg-gray-50 px-3 py-4 rounded-b-md border-t border-gray-200 max-w-300">
                     <div className="flex items-center gap-4 mb-4">
                         <img src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-16 h-16 rounded-xl" />
                         <div className="ml-auto flex gap-2">
@@ -497,14 +497,14 @@ const ApplicantList = () => {
                     )}
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">Filter by Semester</label>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Filter by Intake</label>
                     <select
                         value={selectedSemester}
                         onChange={(e) => setSelectedSemester(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
                         disabled={isLoading}
                     >
-                        <option value="">All Semesters</option>
+                        <option value="">All Intakes</option>
                         {semesters.map(semester => (
                             <option key={semester} value={semester}>{semester}</option>
                         ))}
