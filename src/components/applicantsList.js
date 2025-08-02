@@ -251,10 +251,6 @@ const ApplicantList = () => {
         setTimeout(() => window.print(), 100);
     };
 
-    // const handlePrintList = () => {
-    //     setTimeout(() => window.print(), 1000);
-    // };
-
     const handlePrintList = useReactToPrint({
         contentRef: componentRef,
         documentTitle: "Applicants list",
@@ -547,7 +543,7 @@ const ApplicantList = () => {
 
             <div className="flex justify-end">
                 <button
-                    onClick={handlePrintList}
+                    onClick={(e)=>{handlePrintList(e); setExpandedId(null);}}
                     className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition mb-3"
                 >
                     🖨️ Print List
@@ -561,10 +557,10 @@ const ApplicantList = () => {
                             <img src={CompanyLogo} alt="Company Logo" className="w-24 h-auto" />
                             <div className="gap-4">
                                 <div className="text-5xl font-bold"> Free short courses </div>
-                                <div className="text-3xl text-right"> Admission </div>
+                                <div className="text-3xl text-right"> Admission List </div>
                             </div>
                         </div>
-                        <div className="w-full m-10 py-2 text-xl text-justify">
+                        <div className="w-full mt-10 mb-4 py-2 text-xl text-justify">
                             <b> {selectedCourseName} - (chunk {page})</b>
                         </div>
                     </div>
