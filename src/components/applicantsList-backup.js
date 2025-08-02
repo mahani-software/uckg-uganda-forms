@@ -6,15 +6,10 @@ import DEFAULT_AVATAR from "../images/userRounded.png";
 import DEFAULT_AVATAR2 from "../images/user.png";
 import CompanyLogo from '../images/vyg-uganda.jpeg';
 import DocumentList from './ui/documentList';
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import { useReactToPrint } from "react-to-print";
-
-ModuleRegistry.registerModules([AllCommunityModule]);
 
 const ApplicantList = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCourse, setSelectedCourse] = useState("");
-    const [selectedCourseName, setSelectedCourseName] = useState("All applicants - not filtered");
     const [selectedSemester, setSelectedSemester] = useState("");
     const [expandedId, setExpandedId] = useState(null);
     const [page, setPage] = useState(1);
@@ -24,7 +19,6 @@ const ApplicantList = () => {
     const [editCourses, setEditCourses] = useState([]);
     const containerRef = useRef(null);
     const lastScrollTop = useRef(0);
-    const componentRef = useRef();
 
     // Build query filters
     const filters = useMemo(() => {
@@ -51,11 +45,11 @@ const ApplicantList = () => {
     const [previousPage, setPreviousPage] = useState(0)
     useEffect(() => {
         if(selectedCourse !== previousCourseFilter){
-            fetchApplicantsFn({ entity: "applicant", limit: 100, page, filters })
+            fetchApplicantsFn({ entity: "applicant", limit: 500, page, filters })
             setPreviousCourseFilter(selectedCourse)
         }
         if(page !== previousPage){
-            fetchApplicantsFn({ entity: "applicant", limit: 100, page, filters })
+            fetchApplicantsFn({ entity: "applicant", limit: 500, page, filters })
             setPreviousPage(page)
         }
     },[selectedCourse, page])
@@ -251,14 +245,9 @@ const ApplicantList = () => {
         setTimeout(() => window.print(), 100);
     };
 
-    // const handlePrintList = () => {
-    //     setTimeout(() => window.print(), 1000);
-    // };
-
-    const handlePrintList = useReactToPrint({
-        contentRef: componentRef,
-        documentTitle: "Applicants list",
-    });
+    const handlePrintList = () => {
+        setTimeout(() => window.print(), 1000);
+    };
 
     const renderDetails = (applicant) => {
         const details = {
@@ -482,8 +471,8 @@ const ApplicantList = () => {
             <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800 no-print">Applicants List</h2>
 
             <div className="space-y-4 mb-4 no-print">
-                <div className="flex gap-3 flex-row justify-between">
-                    <div className="w-[70%]">
+                <div className="flex gap-4">
+                    <div className="flex-1">
                         <input
                             type="text"
                             placeholder="Search by any field..."
@@ -492,14 +481,13 @@ const ApplicantList = () => {
                             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
                         />
                     </div>
-                    <div className="border border-gray-300 rounded flex-row justify-between pl-3">
-                        <span>Chunk </span>
+                    <div>
                         <input
                             type="number"
-                            min={1}
+                            min="1"
                             value={inputPage}
                             onChange={handlePageInputChange}
-                            className="w-14 px-1 py-2 focus:outline-none focus:ring-2 focus:ring-lime-400 rounded"
+                            className="w-20 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
                             placeholder="Page"
                             disabled={isLoading}
                         />
@@ -509,12 +497,7 @@ const ApplicantList = () => {
                     <label className="block text-sm font-medium text-gray-600 mb-1">Filter by Course</label>
                     <select
                         value={selectedCourse}
-                        onChange={(e) => {
-                            const selectedGuid = e.target.value;
-                            setSelectedCourse(selectedGuid);
-                            const selectedCourseObj = courses.find(course => course.guid === selectedGuid);
-                            setSelectedCourseName(selectedCourseObj ? selectedCourseObj.courseName : "");
-                        }}
+                        onChange={(e) => setSelectedCourse(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
                         disabled={coursesLoading}
                     >
@@ -543,19 +526,18 @@ const ApplicantList = () => {
                         ))}
                     </select>
                 </div>
-            </div>
-
-            <div className="flex justify-end">
-                <button
-                    onClick={handlePrintList}
-                    className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition mb-3"
-                >
-                    🖨️ Print List
-                </button>
+                <div className="flex justify-end">
+                    <button
+                        onClick={handlePrintList}
+                        className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition"
+                    >
+                        🖨️ Print List
+                    </button>
+                </div>
             </div>
 
             <div className="overflow-x-auto border border-gray-200 rounded-md max-h-[70vh]">
-                <div id="printable-list" ref={componentRef}>
+                <div id="printable-list" ref={containerRef}>
                     <div className="w-full hidden print:block">
                         <div className="flex justify-between items-center mb-6 gap-4">
                             <img src={CompanyLogo} alt="Company Logo" className="w-24 h-auto" />
@@ -564,54 +546,49 @@ const ApplicantList = () => {
                                 <div className="text-3xl text-right"> Admission </div>
                             </div>
                         </div>
-                        <div className="w-full m-10 py-2 text-xl text-justify">
-                            <b> {selectedCourseName} - (chunk {page})</b>
+                        <div className="w-full mt-10 py-2 text-md text-justify">
+                            <b> filtered </b>
                         </div>
                     </div>
+
                     <table className="min-w-[500px] table-auto">
                         <thead className="top-0 bg-zinc-200">
                             <tr>
-                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">Photo</th>
-                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">First Name</th>
-                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">Last Name</th>
-                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">Gender</th>
-                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">Applicant ID</th>
-                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">Phone</th>
+                                <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Photo</th>
+                                <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">First Name</th>
+                                <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Last Name</th>
+                                <th className="text-left px-4 py-3 border-b border-gray-600 font-medium text-gray-700">Applicant ID</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filtered.map((applicant, index) => (
-                                <React.Fragment key={index + 1}>
+                            {filtered.map(applicant => (
+                                <React.Fragment key={applicant.guid}>
                                     <tr
                                         onClick={() => toggleExpand(applicant.guid)}
-                                        className={`cursor-pointer hover:bg-gray-50 transition-colors ${
-                                            ((index + 1) === 25) || (index + 1 > 24 && (index + 1 - 24) % 28 === 0) ? 'page-break avoid-break' : ''
-                                        }`}
+                                        className="cursor-pointer hover:bg-gray-50 transition-colors"
                                     >
-                                        <td className="p-1 border-t border-gray-400">
+                                        <td className="px-4 py-2 border-t border-gray-400">
                                             <img
                                                 src={applicant.photo?.url ? `${applicant.photo?.url}` : DEFAULT_AVATAR}
                                                 alt="Avatar"
-                                                className="w-6 h-6 rounded-full"
+                                                className="w-10 h-10 rounded-full"
                                                 onError={(e) => (e.target.src = DEFAULT_AVATAR)}
                                             />
                                         </td>
-                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{applicant.firstName || 'N/A'}</td>
-                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{applicant.lastName || 'N/A'}</td>
-                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{applicant.gender || 'N/A'}</td>
-                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{applicant.applicantId || 'N/A'}</td>
-                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{applicant.phone || 'N/A'}</td>
+                                        <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.firstName || 'N/A'}</td>
+                                        <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.lastName || 'N/A'}</td>
+                                        <td className="px-4 py-2 border-t border-gray-600 text-sm text-gray-800">{applicant.applicantId || 'N/A'}</td>
                                     </tr>
                                     {expandedId === applicant.guid && (
                                         <tr className="bg-white no-print">
-                                            <td colSpan="5">{renderDetails(applicant)}</td>
+                                            <td colSpan="3">{renderDetails(applicant)}</td>
                                         </tr>
                                     )}
                                 </React.Fragment>
                             ))}
                             {!filtered.length && !isLoading && (
                                 <tr>
-                                    <td colSpan="5" className="text-center py-4 text-gray-500">No applicants found.</td>
+                                    <td colSpan="3" className="text-center py-4 text-gray-500">No applicants found.</td>
                                 </tr>
                             )}
                         </tbody>

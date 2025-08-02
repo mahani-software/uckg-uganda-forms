@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {StrictMode} from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
@@ -9,12 +9,12 @@ import { ToastProvider } from "./hooks/useToast";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  <StrictMode>
     <Provider store={store}>
       <ToastProvider>
         <App />
       </ToastProvider>
     </Provider>
-  </React.StrictMode>
+  </StrictMode>
 );
 reportWebVitals();

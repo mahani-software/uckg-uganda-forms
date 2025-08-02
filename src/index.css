@@ -7,8 +7,8 @@
 @tailwind utilities;
 
 @media print {
-    body * {
-        visibility: hidden;
+    body {
+        overflow: visible;
     }
 
     #printable-section,
@@ -22,4 +22,39 @@
         left: 0;
         width: 100%;
     }
+
+    #printable-list,
+    #printable-list * {
+        visibility: visible;
+    }
+
+    #printable-list {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    .printable {
+        width: 100%;
+        margin: 0 auto;
+        font-size: 12pt;
+    }
+
+    @page {
+        size: A4;
+        margin: 10mm;
+    }
+
+    .page-break {
+        page-break-before: always;
+    }
+
+    .avoid-break {
+        page-break-inside: avoid;
+    }
+}
+
+.ag-cell {
+    page-break-inside: avoid !important;
 }
