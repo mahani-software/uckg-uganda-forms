@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/uckg-uganda-forms/static/css/main.5c743999.css",
-    "main.js": "/uckg-uganda-forms/static/js/main.eca00376.js",
+    "main.css": "/uckg-uganda-forms/static/css/main.d176362e.css",
+    "main.js": "/uckg-uganda-forms/static/js/main.c66fedcb.js",
     "static/js/488.f19c54d0.chunk.js": "/uckg-uganda-forms/static/js/488.f19c54d0.chunk.js",
     "static/media/vyg-uganda.jpeg": "/uckg-uganda-forms/static/media/vyg-uganda.8ccbe0fbd9ba160194ff.jpeg",
     "static/media/userRounded.png": "/uckg-uganda-forms/static/media/userRounded.2c1a8d058011c6ba04ca.png",
     "static/media/logo-horiz-transparent.png": "/uckg-uganda-forms/static/media/logo-horiz-transparent.bdea19b409404ca4d368.png",
     "static/media/vyg.jpeg": "/uckg-uganda-forms/static/media/vyg.d244bdc147ec03e10a15.jpeg",
     "index.html": "/uckg-uganda-forms/index.html",
-    "main.5c743999.css.map": "/uckg-uganda-forms/static/css/main.5c743999.css.map",
-    "main.eca00376.js.map": "/uckg-uganda-forms/static/js/main.eca00376.js.map",
+    "main.d176362e.css.map": "/uckg-uganda-forms/static/css/main.d176362e.css.map",
+    "main.c66fedcb.js.map": "/uckg-uganda-forms/static/js/main.c66fedcb.js.map",
     "488.f19c54d0.chunk.js.map": "/uckg-uganda-forms/static/js/488.f19c54d0.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.5c743999.css",
-    "static/js/main.eca00376.js"
+    "static/css/main.d176362e.css",
+    "static/js/main.c66fedcb.js"
   ]
 }
