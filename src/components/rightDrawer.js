@@ -19,16 +19,11 @@ const RightDrawer = ({ showCard, hideCard, visibleCards, menuOpen, setMenuOpen }
       <div className="flex flex-col items-start px-6 space-y-3">
         {[
           { key: 'studentAdmissionForm', label: 'Applicant Admission' },
+          { key: 'applicantListTable', label: 'Applicants List' },
           { key: 'studentRegistrationForm', label: 'Student registration' },
           { key: 'memberRegistrationForm', label: 'Members' },
-          { key: 'applicantListTable', label: 'Applicants List' },
-          // { key: 'applicantListDownload', label: 'Filtered lists (download)' },
-
         ].map(({ key, label }) => (
-          <div
-            key={key}
-            className="flex items-center space-x-2 cursor-pointer group"
-          >
+          <div key={key} className="flex items-center space-x-2 cursor-pointer group">
             <input
               type="checkbox"
               checked={visibleCards[key]}
