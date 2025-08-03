@@ -19,6 +19,11 @@ const App = () => {
       visible: true,
       component: CoursesAdmissionForm
     },
+    applicantListTable: {
+      key: "applicantListTable",
+      visible: false,
+      component: ApplicantList
+    },
     studentRegistrationForm: {
       key: "studentRegistrationForm",
       visible: false,
@@ -29,17 +34,6 @@ const App = () => {
       visible: false,
       component: MemberRegistrationForm
     },
-    applicantListTable: {
-      key: "applicantListTable",
-      visible: false,
-      component: ApplicantList
-    },
-    // applicantListDownload: {
-    //   key: "applicantListDownload",
-    //   visible: false,
-    //   component: ApplicantListDownload
-    // },
-    
   });
 
   const showCard = (cardKey) => {
