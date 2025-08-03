@@ -246,9 +246,11 @@ const ApplicantList = () => {
         );
     };
 
-    const [printableElement, setPrintableElement] = useState("to-be-printed")
+    const [printableDetailsElement, setPrintableDetailsElement] = useState("to-be-printed")
+    const [printableListElement, setPrintableListElement] = useState("to-be-printed")
     const handlePrint = (applicant) => {
-        setPrintableElement("printable-section")
+        setPrintableDetailsElement("printable-section")
+        setPrintableListElement("to-be-printed"); 
         setExpandedId(applicant.guid);
         setTimeout(() => window.print(), 100);
     };
@@ -468,7 +470,7 @@ const ApplicantList = () => {
 
                 <DocumentList documents={documents.map(doc => doc.url)} />
 
-                <div id={printableElement} className="hidden print:block bg-white p-6 text-sm">
+                <div id={printableDetailsElement} className="hidden print:block bg-white p-6 text-sm">
                     {expandedId && renderPrintable(applicants.find(a => a.guid === expandedId))}
                 </div>
             </>
@@ -545,7 +547,12 @@ const ApplicantList = () => {
 
             <div className="flex justify-end">
                 <button
-                    onClick={(e)=>{ setPrintableElement("printable-list"); handlePrintList(e); setExpandedId(null);}}
+                    onClick={(e) => {
+                        setExpandedId(null);
+                        setPrintableDetailsElement("to-be-printed");
+                        setPrintableListElement("printable-list");
+                        handlePrintList(e);
+                    }}
                     className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition mb-3"
                 >
                     🖨️ Print List
@@ -553,7 +560,7 @@ const ApplicantList = () => {
             </div>
 
             <div className="overflow-x-auto border border-gray-200 rounded-md max-h-[70vh]">
-                <div id={printableElement} ref={componentRef}>
+                <div id={printableListElement} ref={componentRef}>
                     <div className="w-full hidden print:block">
                         <div className="flex justify-between items-center mb-6 gap-4">
                             <img src={CompanyLogo} alt="Company Logo" className="w-24 h-auto" />
