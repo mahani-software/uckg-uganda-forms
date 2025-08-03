@@ -551,7 +551,7 @@ const ApplicantList = () => {
                         setExpandedId(null);
                         setPrintableDetailsElement("to-be-printed");
                         setPrintableListElement("printable-list");
-                        handlePrintList(e);
+                        setTimeout(() => handlePrintList(e), 200);
                     }}
                     className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition mb-3"
                 >
