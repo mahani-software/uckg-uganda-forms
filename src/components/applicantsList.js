@@ -8,6 +8,9 @@ import CompanyLogo from '../images/vyg-uganda.jpeg';
 import DocumentList from './ui/documentList';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { useReactToPrint } from "react-to-print";
+import { PDFDocument } from 'pdf-lib';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -248,6 +251,7 @@ const ApplicantList = () => {
 
     const [printableDetailsElement, setPrintableDetailsElement] = useState("to-be-printed")
     const [printableListElement, setPrintableListElement] = useState("to-be-printed")
+
     const handlePrint = (applicant) => {
         setPrintableDetailsElement("printable-section")
         setPrintableListElement("to-be-printed"); 
@@ -255,10 +259,69 @@ const ApplicantList = () => {
         setTimeout(() => window.print(), 100);
     };
 
+    // const handlePrint = async (applicant) => {
+    //     setPrintableDetailsElement('printable-section');
+    //     setPrintableListElement('to-be-printed');
+    //     setExpandedId(applicant.guid);
+
+    //     setTimeout(async () => {
+    //         const element = document.getElementById('printable-section');
+    //         const canvas = await html2canvas(element, { scale: 1 }); // Lower scale for smaller size
+    //         const imgData = canvas.toDataURL('image/jpeg', 0.5); // Lower quality (0.5)
+
+    //         const pdf = new jsPDF();
+    //         const imgProps = pdf.getImageProperties(imgData);
+    //         const pdfWidth = pdf.internal.pageSize.getWidth();
+    //         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    //         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+    //         // Save initial PDF
+    //         const pdfBytes = pdf.output('arraybuffer');
+
+    //         // Compress with pdf-lib
+    //         const pdfDoc = await PDFDocument.load(pdfBytes);
+    //         const compressedPdfBytes = await pdfDoc.save({ useObjectStreams: true });
+
+    //         // Download compressed PDF
+    //         const blob = new Blob([compressedPdfBytes], { type: 'application/pdf' });
+    //         const link = document.createElement('a');
+    //         link.href = URL.createObjectURL(blob);
+    //         link.download = `applicant-${applicant.applicantId}.pdf`;
+    //         link.click();
+    //     }, 100);
+    // };
+
     const handlePrintList = useReactToPrint({
         contentRef: componentRef,
         documentTitle: "applicants-list-"+selectedCourse,
     });
+
+    // const handlePrintList = async () => {
+    //     setExpandedId(null);
+    //     setPrintableDetailsElement('to-be-printed');
+    //     setPrintableListElement('printable-list');
+    //     setTimeout(async () => {
+    //         const element = document.getElementById('printable-list');
+    //         const canvas = await html2canvas(element, { scale: 1 });
+    //         const imgData = canvas.toDataURL('image/jpeg', 0.5);
+
+    //         const pdf = new jsPDF();
+    //         const imgProps = pdf.getImageProperties(imgData);
+    //         const pdfWidth = pdf.internal.pageSize.getWidth();
+    //         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    //         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+    //         const pdfBytes = pdf.output('arraybuffer');
+    //         const pdfDoc = await PDFDocument.load(pdfBytes);
+    //         const compressedPdfBytes = await pdfDoc.save({ useObjectStreams: true });
+
+    //         const blob = new Blob([compressedPdfBytes], { type: 'application/pdf' });
+    //         const link = document.createElement('a');
+    //         link.href = URL.createObjectURL(blob);
+    //         link.download = `applicants-list-${selectedCourse}.pdf`;
+    //         link.click();
+    //     }, 200);
+    // };
 
     const renderDetails = (applicant) => {
         const details = {
@@ -590,7 +653,7 @@ const ApplicantList = () => {
                                     <tr
                                         onClick={() => toggleExpand(applicant.guid)}
                                         className={`cursor-pointer hover:bg-gray-50 transition-colors ${
-                                            ((index + 1) === 25) || (index + 1 > 24 && (index + 1 - 24) % 28 === 0) ? 'page-break avoid-break' : ''
+                                            ((index + 1) === 25) || (index + 1 > 24 && (index + 1 - 24) % 27 === 0) ? 'page-break avoid-break' : ''
                                         }`}
                                     >
                                         <td className="p-1 border-t border-gray-400">
