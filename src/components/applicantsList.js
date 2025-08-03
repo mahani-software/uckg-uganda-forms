@@ -8,9 +8,7 @@ import CompanyLogo from '../images/vyg-uganda.jpeg';
 import DocumentList from './ui/documentList';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { useReactToPrint } from "react-to-print";
-import { PDFDocument } from 'pdf-lib';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -49,18 +47,15 @@ const ApplicantList = () => {
         error,
     }] = useItemsListReadrMutation();
 
-    const [previousCourseFilter, setPreviousCourseFilter] = useState(undefined)
-    const [previousPage, setPreviousPage] = useState(0)
+    const [previousCourseFilter, setPreviousCourseFilter] = useState(undefined);
+    const [previousPage, setPreviousPage] = useState(0);
     useEffect(() => {
-        if(selectedCourse !== previousCourseFilter){
-            fetchApplicantsFn({ entity: "applicant", max: 50, page, filters })
-            setPreviousCourseFilter(selectedCourse)
+        if (selectedCourse !== previousCourseFilter || page !== previousPage) {
+            fetchApplicantsFn({ entity: "applicant", max: 50, page, filters });
+            setPreviousCourseFilter(selectedCourse);
+            setPreviousPage(page);
         }
-        if(page !== previousPage){
-            fetchApplicantsFn({ entity: "applicant", max: 50, page, filters })
-            setPreviousPage(page)
-        }
-    },[selectedCourse, page])
+    }, [selectedCourse, page, filters, fetchApplicantsFn]);
 
     const {
         isLoading: coursesLoading,
@@ -176,6 +171,44 @@ const ApplicantList = () => {
         setPage(newPage);
     };
 
+    const handleExportToExcel = () => {
+        const exportData = filtered.map(applicant => ({
+            'Applicant ID': applicant.applicantId || 'N/A',
+            'First Name': applicant.firstName || 'N/A',
+            'Last Name': applicant.lastName || 'N/A',
+            'Gender': applicant.gender || 'N/A',
+            'Phone': applicant.phone || 'N/A',
+            'Email': applicant.email || 'N/A',
+            'Address': applicant.physicalAddress || 'N/A',
+            'Nationality': applicant.nationality || 'N/A',
+            'National ID': applicant.nationalId || 'N/A',
+            'Marital Status': applicant.maritalStatus || 'N/A',
+            'Date of Birth': new Date(applicant.dateOfBirth)?.toISOString()?.split('T')[0] || 'N/A',
+            'Challenge Faced': applicant.description || 'N/A',
+            'Intake': applicant.intakeGuid ? `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}` : 'N/A',
+            'Courses': applicant.courses?.filter(crs => crs.courseGuid)
+                .map(crs => crs.courseGuid.courseName)
+                .join(', ') || 'N/A',
+            'Documents': applicant.documents?.map(doc => doc.url).join(', ') || 'N/A'
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Applicants');
+        
+        // Auto-size columns
+        const colWidths = Object.keys(exportData[0]).map((key, i) => {
+            const maxLength = Math.max(
+                key.length,
+                ...exportData.map(row => String(row[key]).length)
+            );
+            return { wch: Math.min(maxLength + 2, 50) };
+        });
+        worksheet['!cols'] = colWidths;
+
+        XLSX.writeFile(workbook, `applicants-list-${selectedCourse || 'all'}.xlsx`);
+    };
+
     const renderPrintable = (applicant) => {
         if (!applicant) return null;
 
@@ -248,79 +281,20 @@ const ApplicantList = () => {
         );
     };
 
-    const [printableDetailsElement, setPrintableDetailsElement] = useState("to-be-printed")
-    const [printableListElement, setPrintableListElement] = useState("to-be-printed")
+    const [printableDetailsElement, setPrintableDetailsElement] = useState("to-be-printed");
+    const [printableListElement, setPrintableListElement] = useState("to-be-printed");
 
     const handlePrint = (applicant) => {
-        setPrintableDetailsElement("printable-section")
+        setPrintableDetailsElement("printable-section");
         setPrintableListElement("to-be-printed"); 
         setExpandedId(applicant.guid);
         setTimeout(() => window.print(), 100);
     };
 
-    // const handlePrint = async (applicant) => {
-    //     setPrintableDetailsElement('printable-section');
-    //     setPrintableListElement('to-be-printed');
-    //     setExpandedId(applicant.guid);
-
-    //     setTimeout(async () => {
-    //         const element = document.getElementById('printable-section');
-    //         const canvas = await html2canvas(element, { scale: 1 }); // Lower scale for smaller size
-    //         const imgData = canvas.toDataURL('image/jpeg', 0.5); // Lower quality (0.5)
-
-    //         const pdf = new jsPDF();
-    //         const imgProps = pdf.getImageProperties(imgData);
-    //         const pdfWidth = pdf.internal.pageSize.getWidth();
-    //         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    //         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-
-    //         // Save initial PDF
-    //         const pdfBytes = pdf.output('arraybuffer');
-
-    //         // Compress with pdf-lib
-    //         const pdfDoc = await PDFDocument.load(pdfBytes);
-    //         const compressedPdfBytes = await pdfDoc.save({ useObjectStreams: true });
-
-    //         // Download compressed PDF
-    //         const blob = new Blob([compressedPdfBytes], { type: 'application/pdf' });
-    //         const link = document.createElement('a');
-    //         link.href = URL.createObjectURL(blob);
-    //         link.download = `applicant-${applicant.applicantId}.pdf`;
-    //         link.click();
-    //     }, 100);
-    // };
-
     const handlePrintList = useReactToPrint({
         contentRef: componentRef,
-        documentTitle: "applicants-list-"+selectedCourse,
+        documentTitle: "applicants-list-" + selectedCourse,
     });
-
-    // const handlePrintList = async () => {
-    //     setExpandedId(null);
-    //     setPrintableDetailsElement('to-be-printed');
-    //     setPrintableListElement('printable-list');
-    //     setTimeout(async () => {
-    //         const element = document.getElementById('printable-list');
-    //         const canvas = await html2canvas(element, { scale: 1 });
-    //         const imgData = canvas.toDataURL('image/jpeg', 0.5);
-
-    //         const pdf = new jsPDF();
-    //         const imgProps = pdf.getImageProperties(imgData);
-    //         const pdfWidth = pdf.internal.pageSize.getWidth();
-    //         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    //         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-
-    //         const pdfBytes = pdf.output('arraybuffer');
-    //         const pdfDoc = await PDFDocument.load(pdfBytes);
-    //         const compressedPdfBytes = await pdfDoc.save({ useObjectStreams: true });
-
-    //         const blob = new Blob([compressedPdfBytes], { type: 'application/pdf' });
-    //         const link = document.createElement('a');
-    //         link.href = URL.createObjectURL(blob);
-    //         link.download = `applicants-list-${selectedCourse}.pdf`;
-    //         link.click();
-    //     }, 200);
-    // };
 
     const renderDetails = (applicant) => {
         const details = {
@@ -607,7 +581,7 @@ const ApplicantList = () => {
                 </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
                 <button
                     onClick={(e) => {
                         setExpandedId(null);
@@ -618,6 +592,12 @@ const ApplicantList = () => {
                     className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition mb-3"
                 >
                     🖨️ Print List
+                </button>
+                <button
+                    onClick={handleExportToExcel}
+                    className="bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition mb-3"
+                >
+                    📊 Export to Excel
                 </button>
             </div>
 
