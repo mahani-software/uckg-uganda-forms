@@ -518,8 +518,8 @@ const ApplicantList = () => {
             <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800 no-print">Applicants List</h2>
 
             <div className="space-y-4 mb-4 no-print">
-                <div className="flex gap-3 flex-row justify-between">
-                    <div className="w-[70%]">
+                <div className="flex flex-row justify-between">
+                    <div className="w-[60%] lg:w-[70%]">
                         <input
                             type="text"
                             placeholder="Search by any field..."
@@ -528,14 +528,14 @@ const ApplicantList = () => {
                             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
                         />
                     </div>
-                    <div className="border border-gray-300 rounded flex-row justify-between pl-3">
+                    <div className="border border-gray-300 rounded flex-row justify-between pl-[1%]">
                         <span>Chunk </span>
                         <input
                             type="number"
                             min={1}
                             value={inputPage}
                             onChange={handlePageInputChange}
-                            className="w-14 px-1 py-2 focus:outline-none focus:ring-2 focus:ring-lime-400 rounded"
+                            className="w-10 px-1 py-2 focus:outline-none focus:ring-2 focus:ring-lime-400 rounded"
                             placeholder="Page"
                             disabled={isLoading}
                         />
@@ -691,7 +691,7 @@ const ApplicantList = () => {
                     📊 Export to Excel
                 </button>
             </div>
-            
+
         </div>
     );
 };
