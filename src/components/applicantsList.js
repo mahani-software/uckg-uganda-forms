@@ -575,15 +575,14 @@ const ApplicantList = () => {
                     >
                         <option value="">All Intakes</option>
                         {semesters.map(semester => (
-                            <option key={semester} value={semester}>{semester}</option>
+                            <option key={semester} value={semester}> {semester} </option>
                         ))}
                     </select>
                 </div>
             </div>
 
-            <div className="flex justify-end gap-2">
-                <button
-                    onClick={(e) => {
+            <div className="flex justify-end gap-2 mt-8">
+                <button onClick={(e) => {
                         setExpandedId(null);
                         setPrintableDetailsElement("to-be-printed");
                         setPrintableListElement("printable-list");
@@ -601,7 +600,7 @@ const ApplicantList = () => {
                 </button>
             </div>
 
-            <div className="overflow-x-auto border border-gray-200 rounded-md max-h-[70vh]">
+            <div className="overflow-x-auto border border-gray-200 rounded-md max-h-[140vh]">
                 <div id={printableListElement} ref={componentRef}>
                     <div className="w-full hidden print:block">
                         <div className="flex justify-between items-center mb-6 gap-4">
@@ -673,6 +672,26 @@ const ApplicantList = () => {
                     </div>
                 )}
             </div>
+
+            <div className="flex justify-end gap-2 mt-8">
+                <button onClick={(e) => {
+                        setExpandedId(null);
+                        setPrintableDetailsElement("to-be-printed");
+                        setPrintableListElement("printable-list");
+                        setTimeout(() => handlePrintList(e), 200);
+                    }}
+                    className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition mb-3"
+                >
+                    🖨️ Print List
+                </button>
+                <button
+                    onClick={handleExportToExcel}
+                    className="bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition mb-3"
+                >
+                    📊 Export to Excel
+                </button>
+            </div>
+            
         </div>
     );
 };
