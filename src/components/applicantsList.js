@@ -51,7 +51,7 @@ const ApplicantList = () => {
     const [previousPage, setPreviousPage] = useState(0);
     useEffect(() => {
         if (selectedCourse !== previousCourseFilter || page !== previousPage) {
-            fetchApplicantsFn({ entity: "applicant", max: 50, page, filters });
+            fetchApplicantsFn({ entity: "applicant", max: 100, page, filters });
             setPreviousCourseFilter(selectedCourse);
             setPreviousPage(page);
         }
