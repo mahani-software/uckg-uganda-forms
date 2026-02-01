@@ -18,7 +18,7 @@ const CoursesAdmissionForm = () => {
     const [gender, setGender] = useState("");
     const [maritalStatus, setMaritalStatus] = useState("");
     const [intakeGuid, setIntakeGuid] = useState('');
-    const [intakes, setIntakes] = useState([{ guid: "yrjjhrueuyry", year: "2024", month: "JUL" }, { guid: "ea3241435636dc23", year: "2025", month: "JUL" }, { guid: "ea3241435636daa21", year: "2026", month: "JUL" }]);
+    const [intakes, setIntakes] = useState([{ guid: "yrjjhrueuyry", year: "2026", month: "FEB" }, { guid: "ea3241435636dc23", year: "2026", month: "JUL" }, { guid: "ea3241435636daa21", year: "2027", month: "FEB" }]);
     const [allCourses, setAllCourses] = useState([{ guid: "ea324241315ac", courseName: "Database admin" }, { guid: "ea324774322", courseName: "Accounting" }]);
     // New state variables for form inputs
     const [formData, setFormData] = useState({
