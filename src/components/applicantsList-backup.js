@@ -67,11 +67,11 @@ const ApplicantList = () => {
     const courses = useSelector(st => selectList(st, "course")) || [];
 
     // Extract unique semesters from applicants
-    const semesters = [...new Set(
-        applicants.map(applicant => 
-            applicant.intakeGuid ? `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}` : null
-        ).filter(Boolean)
-    )].sort();
+    let intakesMap = {};
+    (applicants || []).forEach(applicant => {
+        intakesMap[`${applicant.intakeGuid.year}_${applicant.intakeGuid.month}`] = `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}`
+    })
+    const semesters = Object.values(intakesMap)
 
     // Filter applicants by search term (all fields), course, and semester
     const filtered = applicants.filter(applicant => {
