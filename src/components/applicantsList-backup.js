@@ -22,13 +22,11 @@ const ApplicantList = () => {
 
     // Build query filters
     const filters = useMemo(() => {
-        const filterObj = {};
+        const filterObj = {
+            intakeGuid: "697f01b0bf293c93ad03a92d", //FEB 2026
+        };
         if (selectedCourse) {
             filterObj.courseGuid = selectedCourse;
-        }
-        if (selectedSemester) {
-            const [year, month] = selectedSemester.split('-');
-            filterObj.intakeGuid = { year, month };
         }
         return filterObj;
     }, [selectedCourse, selectedSemester]);
@@ -67,11 +65,11 @@ const ApplicantList = () => {
     const courses = useSelector(st => selectList(st, "course")) || [];
 
     // Extract unique semesters from applicants
-    let intakesMap = {};
-    (applicants || []).forEach(applicant => {
-        intakesMap[`${applicant.intakeGuid.year}_${applicant.intakeGuid.month}`] = `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}`
-    })
-    const semesters = Object.values(intakesMap)
+    // let intakesMap = {};
+    // (applicants || []).forEach(applicant => {
+    //     intakesMap[`${applicant.intakeGuid.year}_${applicant.intakeGuid.month}`] = `${applicant.intakeGuid.year}-${applicant.intakeGuid.month}`
+    // })
+    // const semesters = Object.values(intakesMap)
 
     // Filter applicants by search term (all fields), course, and semester
     const filtered = applicants.filter(applicant => {
@@ -512,6 +510,7 @@ const ApplicantList = () => {
                         </div>
                     )}
                 </div>
+                {/*
                 <div>
                     <label className="block text-sm font-medium text-gray-600 mb-1">Filter by Intake</label>
                     <select
@@ -526,6 +525,8 @@ const ApplicantList = () => {
                         ))}
                     </select>
                 </div>
+                */}
+
                 <div className="flex justify-end">
                     <button
                         onClick={handlePrintList}
