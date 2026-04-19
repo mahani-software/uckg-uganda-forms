@@ -18,8 +18,10 @@ const RightDrawer = ({ showCard, hideCard, visibleCards, menuOpen, setMenuOpen }
       </div>
       <div className="flex flex-col items-start px-6 space-y-3">
         {[
-          { key: 'studentAdmissionForm', label: 'Applicant Admission' },
-          { key: 'applicantListTable', label: 'Applicants List' },
+          { key: 'applicationForm', label: 'Application' },
+          { key: 'applicationList', label: 'Application List' },
+          { key: 'studentAdmissionForm', label: 'Admission' },
+          { key: 'applicantListTable', label: 'Admission List' },
           { key: 'studentRegistrationForm', label: 'Student registration' },
           { key: 'memberRegistrationForm', label: 'Members' },
         ].map(({ key, label }) => (

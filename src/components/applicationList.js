@@ -1,0 +1,700 @@
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useItemsListReaderQuery, useItemsListReadrMutation, useItemFieldsUpdaterMutation } from '../backend/api/sharedCrud';
+import { useSelector } from 'react-redux';
+import { selectList } from "../backend/features/sharedMainState";
+import DEFAULT_AVATAR from "../images/userRounded.png";
+import DEFAULT_AVATAR2 from "../images/user.png";
+import CompanyLogo from '../images/vyg-uganda.jpeg';
+import DocumentList from './ui/documentList';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
+import { useReactToPrint } from "react-to-print";
+import * as XLSX from 'xlsx';
+
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+const ApplicationList = () => {
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCourse, setSelectedCourse] = useState("");
+    const [selectedCourseName, setSelectedCourseName] = useState("All applicants - not filtered");
+    const [selectedSemester, setSelectedSemester] = useState("");
+    const [expandedId, setExpandedId] = useState(null);
+    const [page, setPage] = useState(1);
+    const [inputPage, setInputPage] = useState("1");
+    const [editingId, setEditingId] = useState(null);
+    const [editForm, setEditForm] = useState({});
+    const [editCourses, setEditCourses] = useState([]);
+    const containerRef = useRef(null);
+    const lastScrollTop = useRef(0);
+    const componentRef = useRef();
+
+    // Build query filters
+    const filters = useMemo(() => {
+        const filterObj = {
+            intakeGuid: "697f01b0bf293c93ad03a92d", //FEB 2026
+        };
+        if (selectedCourse) {
+            filterObj.courseGuid = selectedCourse;
+        }
+        return filterObj;
+    }, [selectedCourse, selectedSemester]);
+
+    const [fetchProspectiveFn, {
+        isLoading,
+        isSuccess,
+        isError,
+        error,
+    }] = useItemsListReadrMutation();
+
+    const [previousCourseFilter, setPreviousCourseFilter] = useState(undefined);
+    const [previousPage, setPreviousPage] = useState(0);
+    useEffect(() => {
+        if (selectedCourse !== previousCourseFilter || page !== previousPage) {
+            fetchProspectiveFn({ entity: "prospective", max: 100, page, filters });
+            setPreviousCourseFilter(selectedCourse);
+            setPreviousPage(page);
+        }
+    }, [selectedCourse, page, filters, fetchProspectiveFn]);
+
+    const {
+        isLoading: coursesLoading,
+        isSuccess: coursesSuccess,
+        isError: coursesError,
+        error: coursesErrorMsg
+    } = useItemsListReaderQuery({
+        entity: "course",
+    });
+
+    const [updateApplicant, { isLoading: isUpdating, isError: isUpdateError, error: updateError }] = useItemFieldsUpdaterMutation();
+
+    const applicants = useSelector(st => selectList(st, "prospective")) || [];
+    const courses = useSelector(st => selectList(st, "course")) || [];
+
+    // // Extract unique semesters from applicants
+    // let intakesMap = {};
+    // (applicants || []).forEach(prospective => {
+    //     intakesMap[`${prospective.intakeGuid.year}_${prospective.intakeGuid.month}`] = `${prospective.intakeGuid.year}-${prospective.intakeGuid.month}`
+    // })
+    // const semesters = Object.values(intakesMap)
+
+    // Filter applicants by search term (all fields), course, and semester
+    const filtered = applicants.filter(prospective => {
+        const searchLower = searchTerm.toLowerCase();
+        const fieldsToSearch = [
+            prospective.firstName || '',
+            prospective.lastName || '',
+            prospective.applicantId || '',
+            prospective.email || '',
+            prospective.phone || '',
+            prospective.gender || '',
+            prospective.nationality || '',
+            prospective.physicalAddress || '',
+            prospective.intakeGuid ? `${prospective.intakeGuid.year}-${prospective.intakeGuid.month}` : '',
+            prospective.courses
+                ?.filter(crs => crs.courseGuid)
+                .map(crs => crs.courseGuid.courseName)
+                .join(', ') || '',
+            new Date(prospective.dateOfBirth)?.toISOString()?.split('T')[0] || '',
+            prospective.maritalStatus || '',
+            prospective.nationalId || '',
+            prospective.description || ''
+        ];
+        const matchesSearch = !searchTerm || fieldsToSearch.some(field =>
+            field.toLowerCase().includes(searchLower)
+        );
+        const matchesCourse = !selectedCourse || prospective.courses?.some(course => course.courseGuid?.guid === selectedCourse);
+        const matchesSemester = !selectedSemester || (prospective.intakeGuid && `${prospective.intakeGuid.year}-${prospective.intakeGuid.month}` === selectedSemester);
+        return matchesSearch && matchesSemester;
+    });
+
+    const toggleExpand = (id) => {
+        setExpandedId(prev => (prev === id ? null : id));
+        setEditingId(null); // Close edit mode when collapsing
+    };
+
+    const startEditing = (prospective) => {
+        setEditingId(prospective.guid);
+        setEditForm({
+            firstName: prospective.firstName,
+            lastName: prospective.lastName,
+            phone: prospective.phone,
+            email: prospective.email,
+            physicalAddress: prospective.physicalAddress,
+            nationality: prospective.nationality,
+            maritalStatus: prospective.maritalStatus,
+            dateOfBirth: new Date(prospective.dateOfBirth)?.toISOString()?.split('T')[0],
+            description: prospective.description,
+        });
+        setEditCourses(prospective.courses?.map(course => course.courseGuid?.guid) || []);
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+        setEditForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleCourseChange = (courseGuid) => {
+        setEditCourses(prev =>
+            prev.includes(courseGuid)
+                ? prev.filter(id => id !== courseGuid)
+                : [...prev, courseGuid]
+        );
+    };
+
+    const handleSave = async (applicantId) => {
+        try {
+            await updateApplicant({
+                entity: "prospective",
+                guid: applicantId,
+                data: {
+                    ...editForm,
+                    courses: editCourses
+                }
+            }).unwrap();
+            setEditingId(null);
+            setEditCourses([]);
+        } catch (err) {
+            console.error("Failed to update prospective:", err);
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+        setEditForm({});
+        setEditCourses([]);
+    };
+
+    const handlePageInputChange = (e) => {
+        const value = e.target.value;
+        setInputPage(value);
+        if (value === "" || isNaN(value) || parseInt(value) < 1) return;
+        const newPage = parseInt(value);
+        setPage(newPage);
+    };
+
+    const handleExportToExcel = () => {
+        const exportData = filtered.map(prospective => ({
+            'Applicant ID': prospective.applicantId || 'N/A',
+            'First Name': prospective.firstName || 'N/A',
+            'Last Name': prospective.lastName || 'N/A',
+            'Gender': prospective.gender || 'N/A',
+            'Phone': prospective.phone || 'N/A',
+            'Email': prospective.email || 'N/A',
+            'Address': prospective.physicalAddress || 'N/A',
+            'Nationality': prospective.nationality || 'N/A',
+            'National ID': prospective.nationalId || 'N/A',
+            'Marital Status': prospective.maritalStatus || 'N/A',
+            'Date of Birth': new Date(prospective.dateOfBirth)?.toISOString()?.split('T')[0] || 'N/A',
+            'Challenge Faced': prospective.description || 'N/A',
+            'Intake': prospective.intakeGuid ? `${prospective.intakeGuid.year}-${prospective.intakeGuid.month}` : 'N/A',
+            'Courses': prospective.courses?.filter(crs => crs.courseGuid)
+                .map(crs => crs.courseGuid.courseName)
+                .join(', ') || 'N/A',
+            'Documents': prospective.documents?.map(doc => doc.url).join(', ') || 'N/A'
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Applicants');
+
+        // Auto-size columns
+        const colWidths = Object.keys(exportData[0]).map((key, i) => {
+            const maxLength = Math.max(
+                key.length,
+                ...exportData.map(row => String(row[key]).length)
+            );
+            return { wch: Math.min(maxLength + 2, 50) };
+        });
+        worksheet['!cols'] = colWidths;
+
+        XLSX.writeFile(workbook, `prospectives-list-${selectedCourse || 'all'}.xlsx`);
+    };
+
+    const renderPrintable = (prospective) => {
+        if (!prospective) return null;
+
+        return (
+            <div>
+                <div className="flex justify-between items-center mb-6 gap-4">
+                    <img src={CompanyLogo} alt="Company Logo" className="w-24 h-auto" />
+                    <div className="gap-4">
+                        <div className="text-5xl font-bold"> Free short courses </div>
+                        <div className="text-3xl text-right"> Admission </div>
+                    </div>
+                </div>
+
+                <div className="w-full mt-10 py-2 text-md text-justify">
+                    You have been offered a place to study for free and learn hands-on skills
+                    in the skilling program organised by the Universal Church of the Kingdom of God (UCKG) in Uganda,
+                    through the Victory Youth Group (VYG). The details below will be used to track your attendance
+                    and to help you benefit best. For any inquiry, please contact us on mobile: <b> +256 701 219644 </b>
+                </div>
+
+                <div className="border border-gray-100 mt-6 rounded-lg">
+                    <div className="flex flex-row justify-between mb-4 p-4 bg-lime-100 rounded-t-lg">
+                        <h1 className="text-4xl font-bold my-auto">{prospective.firstName} {prospective.lastName}</h1>
+                        <img src={prospective.photo?.url ? `${prospective.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-24 h-24 rounded-lg" />
+                    </div>
+
+                    <dl className="space-y-2 p-4">
+                        <div className="flex flex-row justify-between">
+                            <span className="text-lg"> Applicant ID: </span>
+                            <span className="text-lg font-bold"> {prospective.applicantId} </span>
+                        </div>
+                        <div className="flex flex-row justify-between">
+                            <span className="text-lg"> Intake: </span>
+                            <span className="text-lg font-bold"> {prospective.intakeGuid?.year} - {prospective.intakeGuid?.month} </span>
+                        </div>
+                        <div className="flex flex-row justify-between">
+                            <span className="text-lg"> Phone: </span>
+                            <span className="text-lg font-bold"> {prospective.phone} </span>
+                        </div>
+                        <div className="flex flex-row justify-between">
+                            <span className="text-lg"> Gender: </span>
+                            <span className="text-lg font-bold"> {prospective.gender} </span>
+                        </div>
+                        <div className="flex flex-row justify-between">
+                            <span className="text-lg"> Email: </span>
+                            <span className="text-lg font-bold"> {prospective.email} </span>
+                        </div>
+                        <div className="flex flex-row justify-between">
+                            <span className="text-lg"> Address: </span>
+                            <span className="text-lg font-bold"> {prospective.physicalAddress} </span>
+                        </div>
+                        <div className="flex flex-row justify-between">
+                            <span className="text-lg"> Nationality: </span>
+                            <span className="text-lg font-bold"> {prospective.nationality} </span>
+                        </div>
+                    </dl>
+                </div>
+                <div className="w-full py-4">
+                    {prospective.courses?.length && (
+                        <div className="w-full"> Your chosen courses: </div>
+                    )}
+                    {prospective.courses?.map((course, index) => (
+                        <div key={index + 1} className="flex flex-row sm:flex-row justify-start gap-6">
+                            <span className="font-medium text-gray-600">{index + 1}</span>
+                            <span className="text-gray-800 ml-4"><b>{course.courseGuid?.courseName}</b></span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
+    const [printableDetailsElement, setPrintableDetailsElement] = useState("to-be-printed");
+    const [printableListElement, setPrintableListElement] = useState("to-be-printed");
+
+    const handlePrint = (prospective) => {
+        setPrintableDetailsElement("printable-section");
+        setPrintableListElement("to-be-printed");
+        setExpandedId(prospective.guid);
+        setTimeout(() => window.print(), 100);
+    };
+
+    const handlePrintList = useReactToPrint({
+        contentRef: componentRef,
+        documentTitle: "applicants-list-" + selectedCourse,
+    });
+
+    const renderDetails = (prospective) => {
+        const details = {
+            'Applicant ID': prospective.applicantId,
+            'Intake': prospective.intakeGuid ? `${prospective.intakeGuid.year}-${prospective.intakeGuid.month}` : 'N/A',
+            'Gender': prospective.gender,
+            'Phone': prospective.phone,
+            'Email': prospective.email,
+            'Address': prospective.physicalAddress,
+            'Nationality': prospective.nationality,
+            'National ID': prospective.nationalId,
+            'Marital Status': prospective.maritalStatus,
+            'Date of Birth': new Date(prospective.dateOfBirth)?.toISOString()?.split('T')[0],
+            'Challenge Faced': prospective.description,
+        };
+
+        const { documents = [] } = prospective || {};
+
+        if (editingId === prospective.guid) {
+            return (
+                <div className="bg-gray-50 px-3 py-4 rounded-b-md">
+                    <div className="flex items-center gap-4 mb-4">
+                        <img src={prospective.photo?.url ? `${prospective.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-16 h-16 rounded-xl" />
+                        <div className="ml-auto flex gap-2">
+                            <button
+                                onClick={() => handleSave(prospective.guid)}
+                                disabled={isUpdating}
+                                className="bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition disabled:opacity-50"
+                            >
+                                {isUpdating ? 'Saving...' : '💾 Save'}
+                            </button>
+                            <button
+                                onClick={cancelEdit}
+                                className="bg-gray-600 text-black text-sm px-4 py-2 rounded hover:bg-gray-700 transition border border-black"
+                            >
+                                ❌ Cancel
+                            </button>
+                        </div>
+                    </div>
+                    {isUpdateError && (
+                        <div className="text-red-500 mb-4">
+                            Error updating prospective: {updateError?.message || 'Unknown error'}
+                        </div>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">First Name</label>
+                            <input
+                                type="text"
+                                name="firstName"
+                                value={editForm.firstName || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Last Name</label>
+                            <input
+                                type="text"
+                                name="lastName"
+                                value={editForm.lastName || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Phone</label>
+                            <input
+                                type="text"
+                                name="phone"
+                                value={editForm.phone || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={editForm.email || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Address</label>
+                            <input
+                                type="text"
+                                name="physicalAddress"
+                                value={editForm.physicalAddress || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Nationality</label>
+                            <input
+                                type="text"
+                                name="nationality"
+                                value={editForm.nationality || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Marital Status</label>
+                            <select
+                                name="maritalStatus"
+                                value={editForm.maritalStatus || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            >
+                                <option value="">Select</option>
+                                <option value="Single">Single</option>
+                                <option value="Married">Married</option>
+                                <option value="Divorced">Divorced</option>
+                                <option value="Widowed">Widowed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-600">Date of Birth</label>
+                            <input
+                                type="date"
+                                name="dateOfBirth"
+                                value={editForm.dateOfBirth || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                            />
+                        </div>
+                        <div className="sm:col-span-2">
+                            <label className="block text-sm font-medium text-gray-600">Challenge Faced</label>
+                            <textarea
+                                name="description"
+                                value={editForm.description || ''}
+                                onChange={handleEditChange}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                                rows="4"
+                            />
+                        </div>
+                        <div className="sm:col-span-2">
+                            <label className="block text-sm font-medium text-gray-600">Course(s) Preferred</label>
+                            {coursesLoading && <div className="text-gray-500">Loading courses...</div>}
+                            {coursesError && (
+                                <div className="text-red-500">
+                                    Error loading courses: {coursesErrorMsg?.message || 'Unknown error'}
+                                </div>
+                            )}
+                            {coursesSuccess && (
+                                <div className="space-y-2">
+                                    {courses.map((course) => (
+                                        <label key={course.guid} className="flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                value={course.guid}
+                                                checked={editCourses.includes(course.guid)}
+                                                onChange={() => handleCourseChange(course.guid)}
+                                                className="rounded text-lime-600 focus:ring-lime-500"
+                                            />
+                                            <span>{course.courseName || course.guid}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <>
+                <div className="bg-gray-50 px-3 py-4 rounded-b-md max-w-300">
+                    <div className="flex items-center gap-4 mb-4">
+                        <img src={prospective.photo?.url ? `${prospective.photo?.url}` : DEFAULT_AVATAR2} alt="Av" className="w-16 h-16 rounded-xl" />
+                        <div className="ml-auto flex gap-2">
+                            <button
+                                onClick={() => startEditing(prospective)}
+                                className="bg-yellow-600 text-black text-sm px-4 py-2 rounded hover:bg-yellow-700 transition border border-black"
+                            >
+                                ✏️ Edit
+                            </button>
+                            <button
+                                onClick={() => handlePrint(prospective)}
+                                className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition"
+                            >
+                                🖨️ Print
+                            </button>
+                        </div>
+                    </div>
+                    <dl className="space-y-2 text-sm text-gray-700">
+                        {Object.entries(details).map(([key, value]) => (
+                            <div key={key} className="flex flex-row justify-between">
+                                <dt className="font-medium text-gray-600">{key}</dt>
+                                <dd className="text-gray-800 ml-4"><b>{value || 'N/A'}</b></dd>
+                            </div>
+                        ))}
+                    </dl>
+                </div>
+                <div className="w-full p-3">
+                    <div className="w-full"> Courses:</div>
+                    {prospective.courses?.filter(crs => crs.courseGuid)?.map((course, index) => (
+                        <div key={index + 1} className="flex flex-row sm:flex-row justify-start gap-6">
+                            <span className="font-medium text-gray-600">{index + 1}</span>
+                            <span className="text-gray-800 ml-4"><b>{course.courseGuid?.courseName}</b></span>
+                        </div>
+                    ))}
+                </div>
+
+                <DocumentList documents={documents.map(doc => doc.url)} />
+
+                <div id={printableDetailsElement} className="hidden print:block bg-white p-6 text-sm">
+                    {expandedId && renderPrintable(applicants.find(a => a.guid === expandedId))}
+                </div>
+            </>
+        );
+    };
+
+    return (
+        <div className="w-full p-6 bg-white rounded-xl shadow-lg md:max-w-[500px]">
+            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800 no-print">Applicants List</h2>
+
+            <div className="space-y-4 mb-4 no-print">
+                <div className="flex flex-row justify-between">
+                    <div className="w-[60%] lg:w-[70%]">
+                        <input
+                            type="text"
+                            placeholder="Search by any field..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                        />
+                    </div>
+                    <div className="border border-gray-300 rounded flex-row justify-between pl-[1%]">
+                        <span>Chunk </span>
+                        <input
+                            type="number"
+                            min={1}
+                            value={inputPage}
+                            onChange={handlePageInputChange}
+                            className="w-10 px-1 py-2 focus:outline-none focus:ring-2 focus:ring-lime-400 rounded"
+                            placeholder="Page"
+                            disabled={isLoading}
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Filter by Course</label>
+                    <select
+                        value={selectedCourse}
+                        onChange={(e) => {
+                            const selectedGuid = e.target.value;
+                            setSelectedCourse(selectedGuid);
+                            const selectedCourseObj = courses.find(course => course.guid === selectedGuid);
+                            setSelectedCourseName(selectedCourseObj ? selectedCourseObj.courseName : "");
+                        }}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                        disabled={coursesLoading}
+                    >
+                        <option value="">All Courses</option>
+                        {courses.map(course => (
+                            <option key={course.guid} value={course.guid}>{course.courseName}</option>
+                        ))}
+                    </select>
+                    {coursesError && (
+                        <div className="text-red-500 text-sm mt-1">
+                            Error loading courses: {coursesErrorMsg?.message || 'Unknown error'}
+                        </div>
+                    )}
+                </div>
+                {/*
+                <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Filter by Intake</label>
+                    <select
+                        value={selectedSemester}
+                        onChange={(e) => setSelectedSemester(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-lime-400"
+                        disabled={isLoading}
+                    >
+                        <option value="">All Intakes</option>
+                        {semesters.map(semester => (
+                            <option key={semester} value={semester}> {semester} </option>
+                        ))}
+                    </select>
+                </div>
+                */}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-8">
+                <button onClick={(e) => {
+                    setExpandedId(null);
+                    setPrintableDetailsElement("to-be-printed");
+                    setPrintableListElement("printable-list");
+                    setTimeout(() => handlePrintList(e), 200);
+                }}
+                    className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition mb-3"
+                >
+                    🖨️ Print List
+                </button>
+                <button
+                    onClick={handleExportToExcel}
+                    className="bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition mb-3"
+                >
+                    📊 Export to Excel
+                </button>
+            </div>
+
+            <div className="overflow-x-auto border border-gray-200 rounded-md max-h-[140vh]">
+                <div id={printableListElement} ref={componentRef}>
+                    <div className="w-full hidden print:block">
+                        <div className="flex justify-between items-center mb-6 gap-4">
+                            <img src={CompanyLogo} alt="Company Logo" className="w-24 h-auto" />
+                            <div className="gap-4">
+                                <div className="text-5xl font-bold"> Free short courses </div>
+                                <div className="text-3xl text-right"> Admission List </div>
+                            </div>
+                        </div>
+                        <div className="w-full mt-10 mb-4 py-2 text-xl text-justify">
+                            <b> {selectedCourseName} - (chunk {page})</b>
+                        </div>
+                    </div>
+                    <table className="min-w-[500px] table-auto">
+                        <thead className="top-0 bg-zinc-200">
+                            <tr>
+                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">Photo</th>
+                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">First Name</th>
+                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">Last Name</th>
+                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">Gender</th>
+                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">Applicant ID</th>
+                                <th className="text-left p-1 border-b border-gray-600 font-medium text-gray-700">Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filtered.map((prospective, index) => (
+                                <React.Fragment key={index + 1}>
+                                    <tr
+                                        onClick={() => toggleExpand(prospective.guid)}
+                                        className={`cursor-pointer hover:bg-gray-50 transition-colors ${((index + 1) === 25) || (index + 1 > 24 && (index + 1 - 24) % 27 === 0) ? 'page-break avoid-break' : ''
+                                            }`}
+                                    >
+                                        <td className="p-1 border-t border-gray-400">
+                                            <img
+                                                src={prospective.photo?.url ? `${prospective.photo?.url}` : DEFAULT_AVATAR}
+                                                alt="Avatar"
+                                                className="w-6 h-6 rounded-full"
+                                                onError={(e) => (e.target.src = DEFAULT_AVATAR)}
+                                            />
+                                        </td>
+                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.firstName || 'N/A'}</td>
+                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.lastName || 'N/A'}</td>
+                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.gender || 'N/A'}</td>
+                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.applicantId || 'N/A'}</td>
+                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.phone || 'N/A'}</td>
+                                    </tr>
+                                    {expandedId === prospective.guid && (
+                                        <tr className="bg-white no-print">
+                                            <td colSpan="5">{renderDetails(prospective)}</td>
+                                        </tr>
+                                    )}
+                                </React.Fragment>
+                            ))}
+                            {!filtered.length && !isLoading && (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-4 text-gray-500">No applicants found.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+                {isLoading && (
+                    <div className="text-center py-4 text-gray-500 no-print">Loading...</div>
+                )}
+                {isError && (
+                    <div className="text-center py-4 text-red-500 no-print">
+                        ❌ Error: {error?.message || 'Failed to load applicants.'}
+                    </div>
+                )}
+            </div>
+
+            <div className="flex justify-end gap-2 mt-8">
+                <button onClick={(e) => {
+                    setExpandedId(null);
+                    setPrintableDetailsElement("to-be-printed");
+                    setPrintableListElement("printable-list");
+                    setTimeout(() => handlePrintList(e), 200);
+                }}
+                    className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition mb-3"
+                >
+                    🖨️ Print List
+                </button>
+                <button
+                    onClick={handleExportToExcel}
+                    className="bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700 transition mb-3"
+                >
+                    📊 Export to Excel
+                </button>
+            </div>
+
+        </div>
+    );
+};
+
+export default ApplicationList;

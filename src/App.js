@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import "./index.css";
 
+import ApplicationForm from './components/applicationForm';
+import ApplicationList from "./components/applicationList";
 import CoursesAdmissionForm from './components/coursesAdmissionForm';
+import ApplicantList from "./components/applicantsList";
 import MemberRegistrationForm from './components/memberRegistrationForm';
-import StudentRegistrationForm from "./components/studentRegistrationForm"
-import ApplicantList from "./components/applicantsList"
-import ApplicantListDownload from "./components/applicantsListDownload"
+import StudentRegistrationForm from "./components/studentRegistrationForm";
+
 import Header from './components/header';
 import Footer from './components/footer';
 import CompanyLogo from './images/vyg-uganda.jpeg';
@@ -14,6 +16,16 @@ import { useUserLoginMutation } from './backend/api/sharedCrud';
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cards, setCards] = useState({
+    applicationForm: {
+      key: "applicationForm",
+      visible: true,
+      component: ApplicationForm
+    },
+    applicantionList: {
+      key: "applicationList",
+      visible: false,
+      component: ApplicationList
+    },
     studentAdmissionForm: {
       key: "studentAdmissionForm",
       visible: true,
