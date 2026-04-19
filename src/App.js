@@ -3,8 +3,8 @@ import "./index.css";
 
 import ApplicationForm from './components/applicationForm';
 import ApplicationList from "./components/applicationList";
-import CoursesAdmissionForm from './components/coursesAdmissionForm';
-import ApplicantList from "./components/applicantsList";
+import AdmissionForm from './components/admissionForm';
+import AdmissionList from "./components/admissionList";
 import MemberRegistrationForm from './components/memberRegistrationForm';
 import StudentRegistrationForm from "./components/studentRegistrationForm";
 
@@ -21,20 +21,20 @@ const App = () => {
       visible: true,
       component: ApplicationForm
     },
-    applicantionList: {
+    applicationList: {
       key: "applicationList",
       visible: false,
       component: ApplicationList
     },
-    studentAdmissionForm: {
-      key: "studentAdmissionForm",
+    admissionForm: {
+      key: "admissionForm",
       visible: true,
-      component: CoursesAdmissionForm
+      component: AdmissionForm
     },
-    applicantListTable: {
-      key: "applicantListTable",
+    admissionList: {
+      key: "admissionList",
       visible: false,
-      component: ApplicantList
+      component: AdmissionList
     },
     studentRegistrationForm: {
       key: "studentRegistrationForm",

@@ -273,7 +273,7 @@ const CoursesAdmissionForm = () => {
 
     return (
         <div className="max-w-lg p-6 bg-white rounded-lg shadow-lg">
-            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800"> Admit prospective </h2>
+            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800"> Register prospective applicant </h2>
             <div className="space-y-4">
                 <div className="pr-2">
                     <label className="block mb-2 text-sm font-medium text-gray-700"> Intake </label>
