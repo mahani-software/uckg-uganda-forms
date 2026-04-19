@@ -515,7 +515,7 @@ const ApplicantList = () => {
 
     return (
         <div className="w-full p-6 bg-white rounded-xl shadow-lg md:max-w-[500px]">
-            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800 no-print">Applicants List</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800 no-print">Prospective Applicants List</h2>
 
             <div className="space-y-4 mb-4 no-print">
                 <div className="flex flex-row justify-between">

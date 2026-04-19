@@ -30,7 +30,7 @@ const ApplicationList = () => {
     // Build query filters
     const filters = useMemo(() => {
         const filterObj = {
-            intakeGuid: "697f01b0bf293c93ad03a92d", //FEB 2026
+            // intakeGuid: "697f01b0bf293c93ad03a92d", //FEB 2026
         };
         if (selectedCourse) {
             filterObj.courseGuid = selectedCourse;
@@ -515,7 +515,7 @@ const ApplicationList = () => {
 
     return (
         <div className="w-full p-6 bg-white rounded-xl shadow-lg md:max-w-[500px]">
-            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800 no-print">Applicants List</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800 no-print">Admission List</h2>
 
             <div className="space-y-4 mb-4 no-print">
                 <div className="flex flex-row justify-between">
