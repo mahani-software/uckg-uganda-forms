@@ -188,8 +188,8 @@ export const sharedCrudApi = appiiSlice.injectEndpoints({
           const params = searchParams.toString();
           targetURL = `/${entity}?page=${page}&limit=${max}&${params}`
         }
-        // console.log("____________________________________")
-        // console.log("<<>>>-targetURL =", targetURL)
+        console.log("____________________________________")
+        console.log("<<>>>-targetURL =", targetURL)
         return ({
           url: targetURL,
           method: "GET",

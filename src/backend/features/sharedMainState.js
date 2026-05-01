@@ -10,6 +10,7 @@ const activeCollectionAdapter = createEntityAdapter({ selectId: (data) => data.k
 const courseAdaptor = createEntityAdapter({ selectId: (data) => data.guid || data._id })
 const intakeAdaptor = createEntityAdapter({ selectId: (data) => data.guid || data._id })
 const applicantAdaptor = createEntityAdapter({ selectId: (data) => data._id })
+const prospectiveAdaptor = createEntityAdapter({ selectId: (data) => data._id })
 const notificationAdaptor = createEntityAdapter({ selectId: (data) => data.guid || data._id })
 const messageAdaptor = createEntityAdapter({ selectId: (data) => (data.guid || data._id) })
 const activeChatMessageAdaptor = createEntityAdapter({ selectId: (data) => data.id })
@@ -20,6 +21,7 @@ const errorAdaptor = createEntityAdapter({ selectId: (data) => data.guid })
 export const mainAdaptors = {
     active_collection: activeCollectionAdapter,
     applicant: applicantAdaptor,
+    prospective: prospectiveAdaptor,
     course: courseAdaptor,
     intake: intakeAdaptor,
     notification: notificationAdaptor,
@@ -33,6 +35,7 @@ export const mainAdaptors = {
 export const mainInixoStates = {
     active_collection: activeCollectionAdapter.getInitialState(),
     applicant: applicantAdaptor.getInitialState(),
+    prospective: prospectiveAdaptor.getInitialState(),
     course: courseAdaptor.getInitialState(),
     intake: intakeAdaptor.getInitialState(),
     message: messageAdaptor.getInitialState(),
