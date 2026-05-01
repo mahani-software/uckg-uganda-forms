@@ -218,15 +218,17 @@ const ApplicationList = () => {
                     <img src={CompanyLogo} alt="Company Logo" className="w-24 h-auto" />
                     <div className="gap-4">
                         <div className="text-5xl font-bold"> Free short courses </div>
-                        <div className="text-3xl text-right"> Admission </div>
+                        <div className="text-3xl text-right"> Application </div>
                     </div>
                 </div>
 
                 <div className="w-full mt-10 py-2 text-md text-justify">
-                    You have been offered a place to study for free and learn hands-on skills
+                    This is a confirmation that we have recorded your application for a place to study for free and learn hands-on skills
                     in the skilling program organised by the Universal Church of the Kingdom of God (UCKG) in Uganda,
-                    through the Victory Youth Group (VYG). The details below will be used to track your attendance
-                    and to help you benefit best. For any inquiry, please contact us on mobile: <b> +256 701 219644 </b>
+                    through the Victory Youth Group (VYG). The details below will be used to process your admission,
+                    for now we request you to be patient and wait for the next intake.
+                    We will let you know when you can pick you admission letter.
+                    For any inquiry, please contact us on mobile: <b> +256 701 219644 </b>
                 </div>
 
                 <div className="border border-gray-100 mt-6 rounded-lg">
@@ -515,7 +517,7 @@ const ApplicationList = () => {
 
     return (
         <div className="w-full p-6 bg-white rounded-xl shadow-lg md:max-w-[500px]">
-            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800 no-print">Admission List</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800 no-print">Application List</h2>
 
             <div className="space-y-4 mb-4 no-print">
                 <div className="flex flex-row justify-between">
@@ -609,7 +611,7 @@ const ApplicationList = () => {
                             <img src={CompanyLogo} alt="Company Logo" className="w-24 h-auto" />
                             <div className="gap-4">
                                 <div className="text-5xl font-bold"> Free short courses </div>
-                                <div className="text-3xl text-right"> Admission List </div>
+                                <div className="text-3xl text-right"> Application List </div>
                             </div>
                         </div>
                         <div className="w-full mt-10 mb-4 py-2 text-xl text-justify">
