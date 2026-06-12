@@ -80,7 +80,7 @@ const ApplicantDownload = () => {
     ProfilePicture: applicant.imageUrl || 'N/A',
     FirstName: applicant.firstName || '',
     LastName: applicant.lastName || '',
-    ApplicantID: applicant.applicantId || '',
+    ApplicantID: applicant.applicantId || applicant.prospectiveId || '',
     Email: applicant.email || '',
     Phone: applicant.phone || '',
     Gender: applicant.gender || '',
@@ -200,7 +200,7 @@ const ApplicantDownload = () => {
             </thead>
             <tbody>
               {filteredApplicants.map(applicant => (
-                <tr key={applicant.applicantId} className="hover:bg-gray-100">
+                <tr key={applicant.applicantId || applicant.prospectiveId} className="hover:bg-gray-100">
                   <td className="p-2 border">
                     <img
                       src={applicant.imageUrl || 'https://via.placeholder.com/40'}
@@ -211,7 +211,7 @@ const ApplicantDownload = () => {
                   </td>
                   <td className="p-2 border text-xs">{applicant.firstName || 'N/A'}</td>
                   <td className="p-2 border text-xs">{applicant.lastName || 'N/A'}</td>
-                  <td className="p-2 border text-xs">{applicant.applicantId || 'N/A'}</td>
+                  <td className="p-2 border text-xs">{applicant.applicantId || applicant.prospectiveId || 'N/A'}</td>
                   <td className="p-2 border text-xs">{applicant.email || 'N/A'}</td>
                   <td className="p-2 border text-xs">{applicant.phone || 'N/A'}</td>
                   <td className="p-2 border text-xs">{applicant.gender || 'N/A'}</td>

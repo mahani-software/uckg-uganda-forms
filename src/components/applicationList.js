@@ -82,7 +82,7 @@ const ApplicationList = () => {
         const fieldsToSearch = [
             prospective.firstName || '',
             prospective.lastName || '',
-            prospective.applicantId || '',
+            prospective.prospectiveId || '',
             prospective.email || '',
             prospective.phone || '',
             prospective.gender || '',
@@ -140,11 +140,11 @@ const ApplicationList = () => {
         );
     };
 
-    const handleSave = async (applicantId) => {
+    const handleSave = async (prospectiveId) => {
         try {
             await updateApplicant({
                 entity: "prospective",
-                guid: applicantId,
+                guid: prospectiveId,
                 data: {
                     ...editForm,
                     courses: editCourses
@@ -173,7 +173,7 @@ const ApplicationList = () => {
 
     const handleExportToExcel = () => {
         const exportData = filtered.map(prospective => ({
-            'Applicant ID': prospective.applicantId || 'N/A',
+            'Applicant ID': prospective.prospectiveId || 'N/A',
             'First Name': prospective.firstName || 'N/A',
             'Last Name': prospective.lastName || 'N/A',
             'Gender': prospective.gender || 'N/A',
@@ -240,7 +240,7 @@ const ApplicationList = () => {
                     <dl className="space-y-2 p-4">
                         <div className="flex flex-row justify-between">
                             <span className="text-lg"> Applicant ID: </span>
-                            <span className="text-lg font-bold"> {prospective.applicantId} </span>
+                            <span className="text-lg font-bold"> {prospective.prospectiveId} </span>
                         </div>
                         <div className="flex flex-row justify-between">
                             <span className="text-lg"> Intake: </span>
@@ -300,7 +300,7 @@ const ApplicationList = () => {
 
     const renderDetails = (prospective) => {
         const details = {
-            'Applicant ID': prospective.applicantId,
+            'Applicant ID': prospective.prospectiveId,
             'Intake': prospective.intakeGuid ? `${prospective.intakeGuid.year}-${prospective.intakeGuid.month}` : 'N/A',
             'Gender': prospective.gender,
             'Phone': prospective.phone,
@@ -648,7 +648,7 @@ const ApplicationList = () => {
                                         <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.firstName || 'N/A'}</td>
                                         <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.lastName || 'N/A'}</td>
                                         <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.gender || 'N/A'}</td>
-                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.applicantId || 'N/A'}</td>
+                                        <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.prospectiveId || 'N/A'}</td>
                                         <td className="p-1 border-t border-gray-600 text-sm text-gray-800">{prospective.phone || 'N/A'}</td>
                                     </tr>
                                     {expandedId === prospective.guid && (
